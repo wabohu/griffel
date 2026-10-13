@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""slate: screenshot annotation tool and whiteboard (startup).
+"""griffel: screenshot annotation tool and whiteboard (startup).
 
-    python slate.py              annotate a screenshot of the monitor under the mouse
-    python slate.py image.png    open a saved drawing or any PNG
-    python slate.py --board      empty whiteboard in a normal window
-    python slate.py --last       open the latest screenshot from the history
+    python griffel.py              annotate a screenshot of the monitor under the mouse
+    python griffel.py image.png    open a saved drawing or any PNG
+    python griffel.py --board      empty whiteboard in a normal window
+    python griffel.py --last       open the latest screenshot from the history
 
 Usage: docs/usage.md. The drawing surface is in canvas.py.
-Must stay executable: ~/.local/bin/slate is a symlink to it (sxhkd).
+Must stay executable: ~/.local/bin/griffel is a symlink to it (sxhkd).
 """
 import argparse
 import sys

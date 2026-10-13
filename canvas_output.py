@@ -30,15 +30,15 @@ from settings import BOARD_EXPORT_MARGIN
 from tools import Tool
 
 # Copied elements in the clipboard: own data type, JSON as in the file format
-ELEMENTS_MIME = "application/x-slate-elements"
-CLIP_FORMAT = "slate-elements"
+ELEMENTS_MIME = "application/x-griffel-elements"
+CLIP_FORMAT = "griffel-elements"
 DUPLICATE_OFFSET = 20  # Ctrl+D: offset in screen pixels
 
 
 def rich_copy_path():
     """Private file with the editable version of the most recently copied image."""
     base = os.environ.get("XDG_RUNTIME_DIR") or tempfile.gettempdir()
-    return Path(base) / "slate" / "clipboard.json"
+    return Path(base) / "griffel" / "clipboard.json"
 
 
 class OutputMixin:

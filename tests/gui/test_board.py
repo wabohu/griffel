@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from harness import SLATE, Session, check, load_drawing, summary, wait  # noqa: E402
+from harness import GRIFFEL, Session, check, load_drawing, summary, wait  # noqa: E402
 
 PAPER = "#f8f6f0"         # light background from DEFAULT_BOARD_BACKGROUNDS
 EMPTY = (960, 120)        # screen point where nothing is drawn
@@ -20,7 +20,7 @@ EMPTY = (960, 120)        # screen point where nothing is drawn
 
 def board_window(s):
     """(PID, window) of the running whiteboard or (None, None)."""
-    for pid in s.slate_pids():
+    for pid in s.griffel_pids():
         wins = s.windows_of(pid)
         if wins:
             return pid, wins[0]
@@ -52,7 +52,7 @@ def main():
         s.key("Escape")
         s.key("Return")
         time.sleep(0.5)
-        check("Esc and Enter do not close the whiteboard", pid in s.slate_pids())
+        check("Esc and Enter do not close the whiteboard", pid in s.griffel_pids())
 
         # Ctrl+B: light background
         s.key("ctrl+b")
@@ -65,12 +65,12 @@ def main():
         s.screenshot("03-rofi")
         ask_rofi(s, "can")
         time.sleep(0.5)
-        check("rofi 'can' (Cancel): whiteboard stays open", pid in s.slate_pids())
+        check("rofi 'can' (Cancel): whiteboard stays open", pid in s.griffel_pids())
 
         # Ctrl+Q, "sa" = Save: file created, window closed
         s.key("ctrl+q")
         ask_rofi(s, "sa")
-        check("rofi 'sa' (Save): whiteboard closed", wait(lambda: pid not in s.slate_pids(), 5))
+        check("rofi 'sa' (Save): whiteboard closed", wait(lambda: pid not in s.griffel_pids(), 5))
         saved = sorted((s.tmp / "output").glob("*_board.png"))
         check("saved as …_board.png", len(saved) == 1)
         if not saved:
@@ -80,8 +80,8 @@ def main():
               hasattr(background, "name") and background.name() == PAPER
               and [e.tool.name for e in elements] == ["RECT"])
 
-        # Open again (like python slate.py file.png): as whiteboard, light, title = file
-        s.spawn([str(SLATE), str(saved[0])], log="reopen")
+        # Open again (like python griffel.py file.png): as whiteboard, light, title = file
+        s.spawn([str(GRIFFEL), str(saved[0])], log="reopen")
         check("opened again", wait(lambda: board_window(s)[1], 10))
         pid, win = board_window(s)
         check("title names the file", saved[0].name in (s.window_name(win) or ""))
@@ -91,10 +91,10 @@ def main():
         s.key("ctrl+q")
         time.sleep(0.5)
         check("unchanged: Ctrl+Q without prompt", not s.rofi_open())
-        check("unchanged: closed", wait(lambda: pid not in s.slate_pids(), 5))
+        check("unchanged: closed", wait(lambda: pid not in s.griffel_pids(), 5))
 
         # Change and discard: the file stays as saved
-        s.spawn([str(SLATE), str(saved[0])], log="reopen2")
+        s.spawn([str(GRIFFEL), str(saved[0])], log="reopen2")
         wait(lambda: board_window(s)[1], 10)
         pid, win = board_window(s)
         wait(lambda: s.focus_id() == win)
@@ -102,7 +102,7 @@ def main():
         s.drag(1100, 400, 1400, 700)
         s.key("ctrl+q")
         ask_rofi(s, "di")
-        check("rofi 'di' (Discard): closed", wait(lambda: pid not in s.slate_pids(), 5))
+        check("rofi 'di' (Discard): closed", wait(lambda: pid not in s.griffel_pids(), 5))
         _, elements = load_drawing(saved[0])
         check("discarded: file unchanged (only the rectangle)", [e.tool.name for e in elements] == ["RECT"])
     return summary()

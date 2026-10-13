@@ -2,7 +2,7 @@
 
 An entry is the same file as when saving with Ctrl+S (document.py): finished
 image plus embedded editing data. The file name contains the time of the
-screenshot (slate_2026-10-01_14-03-22.png), so sorting by name is
+screenshot (griffel_2026-10-01_14-03-22.png), so sorting by name is
 the chronological order. The modification date is no good for this, because older entries
 are rewritten when they are edited further.
 
@@ -17,13 +17,13 @@ from pathlib import Path
 
 from export import new_file_path
 
-_NAME_RE = re.compile(r"^slate_(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})(?:_\d+)?\.png$")
+_NAME_RE = re.compile(r"^griffel_(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})(?:_\d+)?\.png$")
 
 
 def default_history_dir():
-    """~/.local/share/slate/history or $XDG_DATA_HOME/slate/history."""
+    """~/.local/share/griffel/history or $XDG_DATA_HOME/griffel/history."""
     base = os.environ.get("XDG_DATA_HOME") or Path.home() / ".local" / "share"
-    return Path(base) / "slate" / "history"
+    return Path(base) / "griffel" / "history"
 
 
 def entries(directory):

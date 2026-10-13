@@ -1,10 +1,12 @@
-# slate
+# griffel
 
 A screenshot annotation tool and whiteboard for Linux. I wanted something like
 Epic Pen or Tekapoint on my own X11 desktop, something I could change whenever
 it got in my way. This is it.
 
-Press a hotkey and slate freezes the current monitor. Draw arrows, boxes and
+griffel (say GRIF-ul) is German for the stylus you write on a slate with.
+
+Press a hotkey and griffel freezes the current monitor. Draw arrows, boxes and
 notes on top, blur what nobody should see, then paste the result wherever it
 needs to go. Without a screenshot it's a whiteboard for quick sketches and
 diagrams.
@@ -53,26 +55,26 @@ Wayland doesn't work.
 - `xclip` for the clipboard
 - Optional: `xdotool` and `herbstclient` to give the focus back on close,
   `notify-send` with a notification daemon like dunst, and `rofi` for prompts.
-  Without them slate falls back to its own Qt dialogs.
+  Without them griffel falls back to its own Qt dialogs.
 
 ## Getting started
 
 ```sh
-git clone https://github.com/wabohu/slate.git
-ln -s "$PWD/slate/slate.py" ~/.local/bin/slate
+git clone https://github.com/wabohu/griffel.git
+ln -s "$PWD/griffel/griffel.py" ~/.local/bin/griffel
 
-slate                # annotate a screenshot of the monitor under the mouse
-slate --board        # empty whiteboard in a normal window
-slate --last         # open the latest screenshot from the history
-slate image.png      # open a saved drawing or any PNG
+griffel              # annotate a screenshot of the monitor under the mouse
+griffel --board      # empty whiteboard in a normal window
+griffel --last       # open the latest screenshot from the history
+griffel image.png    # open a saved drawing or any PNG
 ```
 
-Put `slate` on a global hotkey, that's how it's meant to be used. Inside, `?`
+Put `griffel` on a global hotkey, that's how it's meant to be used. Inside, `?`
 shows all keys and Esc quits. The full list is in [docs/usage.md](docs/usage.md).
 
 ## Configuration
 
-Settings live in `~/.config/slate/config.toml`. Every option is explained in
+Settings live in `~/.config/griffel/config.toml`. Every option is explained in
 [config.example.toml](config.example.toml). You don't need the file at all,
 anything missing falls back to the defaults.
 

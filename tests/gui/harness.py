@@ -22,17 +22,17 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = Path(__file__).resolve().parent / "out"
-SLATE = REPO / "slate.py"
+GRIFFEL = REPO / "griffel.py"
 KEYSINK = Path(__file__).resolve().parent / "keysink.py"
 
-# Bindings in the test: start via Alt+Escape as in real use (via the executable slate.py,
+# Bindings in the test: start via Alt+Escape as in real use (via the executable griffel.py,
 # so it also checks the executable bit), plus two test hotkeys
 SXHKDRC = """\
 alt + Escape
-  {slate}
+  {griffel}
 
 alt + Delete
-  {slate} --board
+  {griffel} --board
 
 super + k
   touch {tmp}/hotkey-fired
@@ -41,7 +41,7 @@ super + j
   herbstclient jumpto $(xdotool search --name '^keysink$' | head -1)
 """
 
-SLATE_CONFIG = """\
+GRIFFEL_CONFIG = """\
 [ui]
 messages = "toast"   # no dunst in the test
 
@@ -89,7 +89,7 @@ class Session:
     def __init__(self, name, size="1920x1080"):
         self.name = name
         self.size = size
-        self.tmp = Path(tempfile.mkdtemp(prefix="slate-gui-"))
+        self.tmp = Path(tempfile.mkdtemp(prefix="griffel-gui-"))
         self.out = OUT / name
         self.procs = []
         self.display = _free_display()
@@ -111,10 +111,10 @@ class Session:
             shutil.rmtree(self.out)
         self.out.mkdir(parents=True)
         home = self.tmp / "home"
-        (home / ".config" / "slate").mkdir(parents=True)
-        (home / ".config" / "slate" / "config.toml").write_text(SLATE_CONFIG.format(tmp=self.tmp))
+        (home / ".config" / "griffel").mkdir(parents=True)
+        (home / ".config" / "griffel" / "config.toml").write_text(GRIFFEL_CONFIG.format(tmp=self.tmp))
         sxhkdrc = self.tmp / "sxhkdrc"
-        sxhkdrc.write_text(SXHKDRC.format(slate=SLATE, tmp=self.tmp))
+        sxhkdrc.write_text(SXHKDRC.format(griffel=GRIFFEL, tmp=self.tmp))
         autostart = self.tmp / "hlwm-autostart"
         autostart.write_text("#!/bin/sh\nherbstclient set focus_follows_mouse true\n")
         autostart.chmod(0o755)
@@ -131,11 +131,11 @@ class Session:
         self.spawn(["herbstluftwm", "--autostart", str(autostart)])
         if not wait(lambda: self.run(["herbstclient", "get", "focus_follows_mouse"]).stdout.strip() == "true", 10):
             raise RuntimeError("herbstluftwm does not start")
-        self.spawn(["sxhkd", "-c", str(sxhkdrc)], log="sxhkd")  # including the output of slate
+        self.spawn(["sxhkd", "-c", str(sxhkdrc)], log="sxhkd")  # including the output of griffel
         time.sleep(0.5)  # sxhkd does not report when it is ready
 
     def stop(self):
-        for pid in self.slate_pids():
+        for pid in self.griffel_pids():
             os.kill(pid, signal.SIGKILL)
         for proc in reversed(self.procs):
             proc.terminate()
@@ -155,15 +155,15 @@ class Session:
         return subprocess.run(cmd, env=self.env, capture_output=True, text=True, timeout=10)
 
     # --- processes and windows ---
-    def slate_pids(self):
-        """PIDs of slate.py on THIS display (never your real instances)."""
+    def griffel_pids(self):
+        """PIDs of griffel.py on THIS display (never your real instances)."""
         pids = []
         for proc in Path("/proc").iterdir():
             if not proc.name.isdigit():
                 continue
             try:
                 cmdline = (proc / "cmdline").read_bytes()
-                if b"slate.py" not in cmdline:
+                if b"griffel.py" not in cmdline:
                     continue
                 environ = (proc / "environ").read_bytes().split(b"\0")
             except OSError:
@@ -219,8 +219,8 @@ class Session:
         return _qt_image(self.screenshot(name)).pixelColor(x, y).name()
 
     def history_entries(self):
-        directory = Path(self.env["XDG_DATA_HOME"]) / "slate" / "history"
-        return sorted(directory.glob("slate_*.png")) if directory.exists() else []
+        directory = Path(self.env["XDG_DATA_HOME"]) / "griffel" / "history"
+        return sorted(directory.glob("griffel_*.png")) if directory.exists() else []
 
     def start_keysink(self):
         """Start the test window, wait until it is there and has the focus. Returns: output file."""

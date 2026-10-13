@@ -1,6 +1,6 @@
 """Tools: enum, names from the config, geometry of the shapes and icons.
 
-Without Canvas dependencies, so elements.py and slate.py can both build on it
+Without Canvas dependencies, so elements.py and griffel.py can both build on it
 without importing each other.
 """
 import math

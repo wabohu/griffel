@@ -18,8 +18,8 @@ from harness import Session, check, load_elements, summary, wait  # noqa: E402
 def main():
     with Session("select") as s:
         s.key("alt+Escape")
-        check("overlay started", wait(lambda: s.slate_pids(), 10))
-        pid = s.slate_pids()[0]
+        check("overlay started", wait(lambda: s.griffel_pids(), 10))
+        pid = s.griffel_pids()[0]
         wait(lambda: s.windows_of(pid), 10)
         time.sleep(0.4)
         s.key("f")
@@ -36,7 +36,7 @@ def main():
         time.sleep(0.3)
         s.screenshot("03-deleted")
         s.key("Return")
-        check("quit", wait(lambda: not s.slate_pids(), 10))
+        check("quit", wait(lambda: not s.griffel_pids(), 10))
         entries = s.history_entries()
         remaining = load_elements(entries[0]) if entries else []
         check(f"only the third rectangle remains ({len(remaining)})",
@@ -44,8 +44,8 @@ def main():
 
         # Front/back: two overlapping markers, bring the lower one to the front
         s.key("alt+Escape")
-        wait(lambda: s.slate_pids(), 10)
-        wait(lambda: s.windows_of(s.slate_pids()[0]), 10)
+        wait(lambda: s.griffel_pids(), 10)
+        wait(lambda: s.windows_of(s.griffel_pids()[0]), 10)
         time.sleep(0.4)
         s.key("c")
         for x in (600, 625):
@@ -58,7 +58,7 @@ def main():
         time.sleep(0.3)
         s.screenshot("04-marker-front")
         s.key("Return")
-        wait(lambda: not s.slate_pids(), 10)
+        wait(lambda: not s.griffel_pids(), 10)
         entries = s.history_entries()
         markers = [e for e in load_elements(entries[-1])] if entries else []
         check("Ctrl+Shift+↑: the first marker is on top now",
@@ -66,8 +66,8 @@ def main():
 
         # Rotate: rectangle, W, click on its edge, 6 × Shift+Q = 30°, Q once = back to 25°
         s.key("alt+Escape")
-        wait(lambda: s.slate_pids(), 10)
-        wait(lambda: s.windows_of(s.slate_pids()[0]), 10)
+        wait(lambda: s.griffel_pids(), 10)
+        wait(lambda: s.windows_of(s.griffel_pids()[0]), 10)
         time.sleep(0.4)
         s.key("f")
         s.drag(700, 300, 1100, 500)
@@ -80,7 +80,7 @@ def main():
         time.sleep(0.3)
         s.screenshot("05-rotated")
         s.key("Return")
-        wait(lambda: not s.slate_pids(), 10)
+        wait(lambda: not s.griffel_pids(), 10)
         entries = s.history_entries()
         rects = [e for e in load_elements(entries[-1]) if e.tool.name == "RECT"] if entries else []
         check(f"Shift+Q ×6, Q ×1: rectangle rotated by 25° ({[r.rotation() for r in rects]})",
@@ -89,8 +89,8 @@ def main():
         # Rotate handle: 24 px above the top edge, straight above the middle (900, 400); drag it
         # to (1137, 409): from -90° (up) to atan2(9, 237) = 2.17°, so 92.17° without snapping
         s.key("alt+Escape")
-        wait(lambda: s.slate_pids(), 10)
-        wait(lambda: s.windows_of(s.slate_pids()[0]), 10)
+        wait(lambda: s.griffel_pids(), 10)
+        wait(lambda: s.windows_of(s.griffel_pids()[0]), 10)
         time.sleep(0.4)
         s.key("f")
         s.drag(700, 300, 1100, 500)              # middle (900, 400)
@@ -106,7 +106,7 @@ def main():
         time.sleep(0.3)
         s.screenshot("07-rotated-by-handle")
         s.key("Return")
-        wait(lambda: not s.slate_pids(), 10)
+        wait(lambda: not s.griffel_pids(), 10)
         entries = s.history_entries()
         rects = [e for e in load_elements(entries[-1]) if e.tool.name == "RECT"] if entries else []
         check(f"rotate handle: follows the mouse freely, about 92.17° ({[r.rotation() for r in rects]})",

@@ -41,12 +41,12 @@ def main():
     # Screenshot mode: nothing docks
     with Session("connector") as s:
         s.key("alt+Escape")
-        check("overlay started", wait(lambda: s.slate_pids(), 10))
-        wait(lambda: s.windows_of(s.slate_pids()[0]), 10)
+        check("overlay started", wait(lambda: s.griffel_pids(), 10))
+        wait(lambda: s.windows_of(s.griffel_pids()[0]), 10)
         time.sleep(0.4)
         draw_scene(s)
         s.key("Return")
-        check("quit", wait(lambda: not s.slate_pids(), 10))
+        check("quit", wait(lambda: not s.griffel_pids(), 10))
         entries = s.history_entries()
         kinds = shapes(load_elements(entries[-1]) if entries else [])
         check(f"screenshot: the arrow stays free ({sorted(kinds)})",
@@ -55,7 +55,7 @@ def main():
     # Whiteboard: docks, follows, carries a text
     with Session("connector-board") as s:
         s.key("alt+Delete")
-        check("whiteboard started", wait(lambda: s.slate_pids() and s.windows_of(s.slate_pids()[0]), 10))
+        check("whiteboard started", wait(lambda: s.griffel_pids() and s.windows_of(s.griffel_pids()[0]), 10))
         time.sleep(0.4)
         draw_scene(s)
         s.key("w")
@@ -83,7 +83,7 @@ def main():
             check("the arrow carries the text 'SQL'",
                   arrow.label is not None and arrow.label.toPlainText() == "SQL")
         s.key("ctrl+q")
-        check("quit", wait(lambda: not s.slate_pids(), 10))
+        check("quit", wait(lambda: not s.griffel_pids(), 10))
     return summary()
 
 

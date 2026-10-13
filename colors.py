@@ -261,7 +261,7 @@ def load_palette(config_path=None):
 
 
 def load_terminal_font(config_path=None):
-    """Font family of the terminal for monospace text: [font.bold] family (text in slate is
+    """Font family of the terminal for monospace text: [font.bold] family (text in griffel is
     bold), otherwise [font.normal] family; None without a config or entry."""
     try:
         path = Path(config_path) if config_path else find_config()

@@ -17,8 +17,8 @@ from harness import Session, check, load_elements, summary, wait  # noqa: E402
 def main():
     with Session("marker") as s:
         s.key("alt+Escape")
-        check("overlay started", wait(lambda: s.slate_pids(), 10))
-        pid = s.slate_pids()[0]
+        check("overlay started", wait(lambda: s.griffel_pids(), 10))
+        pid = s.griffel_pids()[0]
         wait(lambda: s.windows_of(pid), 10)
         time.sleep(0.4)
         s.key("c")
@@ -33,7 +33,7 @@ def main():
         time.sleep(0.4)
         s.screenshot("01-marker")
         s.key("Return")
-        check("quit", wait(lambda: not s.slate_pids(), 10))
+        check("quit", wait(lambda: not s.griffel_pids(), 10))
         entries = s.history_entries()
         markers = [e for e in load_elements(entries[0]) if e.tool.name == "MARKER"] if entries else []
         check("four markers saved, three numbers and one letter",

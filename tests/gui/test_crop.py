@@ -22,8 +22,8 @@ def main():
         s.start_keysink()  # white window: darkening outside easy to see and measure
         wait(lambda: s.focus_id() == s.window_named("keysink"))
         s.key("alt+Escape")
-        check("overlay started", wait(lambda: s.slate_pids(), 10))
-        pid = s.slate_pids()[0]
+        check("overlay started", wait(lambda: s.griffel_pids(), 10))
+        pid = s.griffel_pids()[0]
         wait(lambda: s.windows_of(pid), 10)
         time.sleep(0.4)
         s.key("f")
@@ -53,7 +53,7 @@ def main():
         time.sleep(0.3)
         s.screenshot("05-adjusted-again")
         s.key("Return")
-        check("quit", wait(lambda: not s.slate_pids(), 10))
+        check("quit", wait(lambda: not s.griffel_pids(), 10))
         png = s.tmp / "clip.png"
         with open(png, "wb") as f:
             subprocess.run(["xclip", "-selection", "clipboard", "-t", "image/png", "-o"],

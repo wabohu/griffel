@@ -1,6 +1,6 @@
 #!/bin/sh
 # Before every commit: if the commit changes config.example.toml, bring your own config
-# (~/.config/slate/config.toml) up to date with the template, your own values stay.
+# (~/.config/griffel/config.toml) up to date with the template, your own values stay.
 # Never blocks the commit. Set up via: git config core.hooksPath scripts/git-hooks
 if git diff --cached --name-only | grep -qx 'config.example.toml'; then
     python scripts/sync_config.py || echo "[pre-commit] sync_config failed, committing anyway" >&2

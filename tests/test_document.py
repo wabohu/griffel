@@ -60,7 +60,7 @@ def main():
     out = Path(default_output_dir())
 
     def drawings():  # saved drawings, without export PNGs
-        return sorted(p for p in out.glob("slate_*.png") if not p.stem.endswith("_export"))
+        return sorted(p for p in out.glob("griffel_*.png") if not p.stem.endswith("_export"))
 
     QTest.keyClick(canvas, Qt.Key_S, Qt.ControlModifier)
     QTest.keyClick(canvas, Qt.Key_S, Qt.ControlModifier)
@@ -74,7 +74,7 @@ def main():
     rendered = canvas.render_image()
     check("saved PNG shows the drawing",
           QImage(str(path)).convertToFormat(rendered.format()) == rendered)
-    check("export PNG without editing data", not QImage(str(exports[0])).text("slate"))
+    check("export PNG without editing data", not QImage(str(exports[0])).text("griffel"))
 
     bg, elements, is_drawing, message = load_document(path)
     check(f"loaded as a drawing ({message})", is_drawing and len(elements) == len(canvas.elements()))
@@ -83,6 +83,17 @@ def main():
     reopened = make_canvas(QPixmap.fromImage(bg), elements, path)
     check("loaded again = pixel identical", reopened.render_image() == rendered)
     check("undo empty after loading", reopened.undo_stack.count() == 0)
+
+    # Drawings from before the rename (key and format "slate") stay editable
+    legacy = QImage(str(path))
+    legacy.setText("slate", legacy.text("griffel").replace('"format":"griffel"', '"format":"slate"'))
+    legacy.setText("griffel", "")
+    legacy_path = path.with_name("legacy.png")
+    legacy.save(str(legacy_path))
+    _, old, old_is_drawing, message = load_document(legacy_path)
+    check(f"old 'slate' PNG loads as a drawing ({message})",
+          old_is_drawing and [e.to_dict() for e in old] == [e.to_dict() for e in elements])
+    legacy_path.unlink()
 
     # Keep working: move an element, save, load again
     QTest.keyClick(reopened, Qt.Key_W)

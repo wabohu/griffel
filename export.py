@@ -78,7 +78,7 @@ def copy_text_to_clipboard(text):
 
 def copy_data_to_clipboard(data, mime):
     """Arbitrary data (bytes) with its own data type to the clipboard, e.g. copied
-    elements ("application/x-slate-elements"). Via xclip they survive quitting,
+    elements ("application/x-griffel-elements"). Via xclip they survive quitting,
     so they can be pasted in another window. Returns: ok."""
     if shutil.which("xclip"):
         try:
@@ -118,17 +118,17 @@ def data_from_clipboard(mime):
 
 
 def default_output_dir():
-    """~/Pictures/slate or the XDG pictures folder, if it is named differently."""
+    """~/Pictures/griffel or the XDG pictures folder, if it is named differently."""
     pictures = QStandardPaths.writableLocation(QStandardPaths.PicturesLocation)
-    return Path(pictures or Path.home() / "Pictures") / "slate"
+    return Path(pictures or Path.home() / "Pictures") / "griffel"
 
 
 def new_file_path(directory, suffix=""):
     """Free file name with a time stamp in the folder (gets created), e.g.
-    slate_2026-10-01_14-03-22.png; on a collision _2, _3 … May raise OSError."""
+    griffel_2026-10-01_14-03-22.png; on a collision _2, _3 … May raise OSError."""
     directory = Path(directory).expanduser()
     directory.mkdir(parents=True, exist_ok=True)
-    stem = datetime.now().strftime("slate_%Y-%m-%d_%H-%M-%S") + suffix
+    stem = datetime.now().strftime("griffel_%Y-%m-%d_%H-%M-%S") + suffix
     path = directory / f"{stem}.png"
     counter = 2
     while path.exists():  # saving twice in the same second

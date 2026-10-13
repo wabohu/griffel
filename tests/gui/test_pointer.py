@@ -28,8 +28,8 @@ def main():
         sink_out = s.start_keysink()  # light background in the screenshot: darkening easy to measure
         wait(lambda: s.focus_id() == s.window_named("keysink"))
         s.key("alt+Escape")
-        check("overlay started", wait(lambda: s.slate_pids(), 10))
-        pid = s.slate_pids()[0]
+        check("overlay started", wait(lambda: s.griffel_pids(), 10))
+        pid = s.griffel_pids()[0]
         wait(lambda: s.windows_of(pid), 10)
         s.move(*MOUSE)
         time.sleep(0.5)
@@ -53,17 +53,17 @@ def main():
 
         s.key("Escape")
         time.sleep(0.3)
-        check("Esc ends pointing, not the tool", pid in s.slate_pids())
+        check("Esc ends pointing, not the tool", pid in s.griffel_pids())
         s.key("Escape")
-        check("second Esc quits the tool", wait(lambda: not s.slate_pids(), 5))
+        check("second Esc quits the tool", wait(lambda: not s.griffel_pids(), 5))
         check("nothing drawn while pointing (no history entry)", s.history_entries() == [])
         check("test window untouched", sink_out.read_text() == "")
 
         # The magnifier really magnifies: vertical rectangle edge at x=1000, mouse 20 px to its left.
         # With magnification 2 the edge appears in the magnifier at x≈1020.
         s.key("alt+Escape")
-        wait(lambda: s.slate_pids(), 10)
-        pid = s.slate_pids()[0]
+        wait(lambda: s.griffel_pids(), 10)
+        pid = s.griffel_pids()[0]
         wait(lambda: s.windows_of(pid), 10)
         time.sleep(0.4)
         s.key("f")
@@ -78,7 +78,7 @@ def main():
         check("magnifier: edge appears magnified further right", lens != plain)
         s.key("Escape")
         s.key("Escape")
-        wait(lambda: not s.slate_pids(), 5)
+        wait(lambda: not s.griffel_pids(), 5)
     return summary()
 
 

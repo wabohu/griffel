@@ -157,7 +157,7 @@ class Settings:
         # Messages and prompts: dunst/rofi or Qt ([ui] messages, dialogs)
         self.use_dunst = self.config_choice(config, "messages", ("dunst", "toast"))
         self.use_rofi = self.config_choice(config, "dialogs", ("rofi", "qt"))
-        self.rofi_theme = get_str(config, "ui", "rofi_theme")  # None = rofi/slate.rasi in the project
+        self.rofi_theme = get_str(config, "ui", "rofi_theme")  # None = rofi/griffel.rasi in the project
 
         # Corner radius of new rectangles from [rect], separate value in the whiteboard
         self.rect_radius = self.config_radius(config, "radius_board", DEFAULT_RECT_RADIUS_BOARD) \

@@ -19,8 +19,8 @@ from harness import Session, check, load_drawing, summary, wait  # noqa: E402
 def main():
     with Session("clipboard") as s:
         s.key("alt+Escape")
-        check("overlay started", wait(lambda: s.slate_pids(), 10))
-        wait(lambda: s.windows_of(s.slate_pids()[0]), 10)
+        check("overlay started", wait(lambda: s.griffel_pids(), 10))
+        wait(lambda: s.windows_of(s.griffel_pids()[0]), 10)
         time.sleep(0.4)
         s.key("f")
         s.drag(300, 300, 500, 450)
@@ -31,11 +31,11 @@ def main():
         s.key("ctrl+c")
         s.key("Escape")          # deselect
         s.key("Escape")          # quit; xclip holds the clipboard
-        check("screenshot quit", wait(lambda: not s.slate_pids(), 10))
+        check("screenshot quit", wait(lambda: not s.griffel_pids(), 10))
 
         s.key("alt+Delete")
-        check("whiteboard started", wait(lambda: s.slate_pids(), 10))
-        pid = s.slate_pids()[0]
+        check("whiteboard started", wait(lambda: s.griffel_pids(), 10))
+        pid = s.griffel_pids()[0]
         wait(lambda: s.windows_of(pid), 10)
         time.sleep(0.6)
         s.move(900, 500)
@@ -58,7 +58,7 @@ def main():
                     labels.append(e.marker_order)
             check("markers count on in the whiteboard (different order)", len(set(labels)) == 2)
         s.key("ctrl+q")
-        wait(lambda: not s.slate_pids(), 5)
+        wait(lambda: not s.griffel_pids(), 5)
 
     # Crop with markers into the whiteboard: set a marker, y, Enter; in the whiteboard Ctrl+V
     # -> image element with the screenshot part, the marker stays a separate element.
@@ -68,8 +68,8 @@ def main():
         wait(lambda: s.focus_id() == s.window_named("keysink"))
         s.type("Hello class")
         s.key("alt+Escape")
-        wait(lambda: s.slate_pids(), 10)
-        wait(lambda: s.windows_of(s.slate_pids()[0]), 10)
+        wait(lambda: s.griffel_pids(), 10)
+        wait(lambda: s.windows_of(s.griffel_pids()[0]), 10)
         time.sleep(0.4)
         s.key("c")
         s.move(400, 500)
@@ -77,10 +77,10 @@ def main():
         s.key("x")
         s.drag(100, 400, 700, 650)          # crop around text and marker
         s.key("Return")
-        check("screenshot copied and quit", wait(lambda: not s.slate_pids(), 10))
+        check("screenshot copied and quit", wait(lambda: not s.griffel_pids(), 10))
         s.key("alt+Delete")
-        wait(lambda: s.slate_pids(), 10)
-        wait(lambda: s.windows_of(s.slate_pids()[0]), 10)
+        wait(lambda: s.griffel_pids(), 10)
+        wait(lambda: s.windows_of(s.griffel_pids()[0]), 10)
         time.sleep(0.6)
         # The test window shares the screen with the whiteboard (tiled, upper half);
         # focus follows the mouse, so move the mouse into the whiteboard (lower half)
@@ -108,7 +108,7 @@ def main():
                   and elements[0].size.toTuple() == (600.0, 250.0)
                   and elements[2].size.toTuple() == (160.0, 90.0))
         s.key("ctrl+q")
-        wait(lambda: not s.slate_pids(), 5)
+        wait(lambda: not s.griffel_pids(), 5)
     return summary()
 
 

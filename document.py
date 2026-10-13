@@ -1,18 +1,18 @@
 """Save and load drawings: a normal PNG with embedded editing data.
 
 The PNG shows the drawing with all markings, just as any image viewer
-displays it. In addition, a PNG text chunk (metadata, key "slate") holds
+displays it. In addition, a PNG text chunk (metadata, key "griffel") holds
 a JSON document:
 
     {
-      "format": "slate", "version": 1,
+      "format": "griffel", "version": 1,
       "background": {"type": "image", "png": "<Base64 of the raw screenshot>"}
                  or {"type": "color", "color": "#24283b"}   (whiteboard),
       "elements": [ {"type": "shape", ...}, {"type": "text", ...} ],  # bottom to top
       "crop": [x, y, width, height]   (optional: crop in scene coordinates, key y)
     }
 
-Opening such a PNG with slate makes everything editable again. A PNG without this
+Opening such a PNG with griffel makes everything editable again. A PNG without this
 data opens as a background. Programs that save the image again often discard
 the metadata; the own file stays untouched by that.
 
@@ -31,9 +31,10 @@ from PySide6.QtGui import QColor, QImage, QImageReader
 from elements import ImageElement, ShapeElement, TextElement
 from export import png_bytes, short_path
 
-FORMAT = "slate"
+FORMAT = "griffel"
 VERSION = 1
-PNG_KEY = "slate"
+PNG_KEY = "griffel"
+LEGACY_PNG_KEYS = ("slate",)  # drawings from before the rename (slate -> griffel) stay editable
 ELEMENT_TYPES = {"shape": ShapeElement, "text": TextElement, "image": ImageElement}
 
 # Allow large embedded images (otherwise Qt limits image sizes to 256 MB of memory)
@@ -105,14 +106,15 @@ def load_document(path, with_crop=False):
     if image.isNull():
         result = None, [], False, f"Cannot open {path} as an image"
         return result + (None,) if with_crop else result
-    raw = image.text(PNG_KEY)
+    keys = (PNG_KEY,) + LEGACY_PNG_KEYS
+    raw = next((text for text in map(image.text, keys) if text), "")
     if not raw:
         result = image, [], False, f"Image opened: {short_path(path)}"
         return result + (None,) if with_crop else result
     try:
         document = json.loads(raw)
-        if document.get("format") != FORMAT:
-            raise ValueError("not a slate document")
+        if document.get("format") not in (FORMAT,) + LEGACY_PNG_KEYS:
+            raise ValueError("not a griffel document")
         if document.get("version", 0) > VERSION:
             print(f"[document] Version {document['version']} is newer than this tool ({VERSION}), "
                   "trying anyway", file=sys.stderr)

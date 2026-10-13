@@ -29,8 +29,8 @@ def main():
         s.type(TEXT)
         time.sleep(0.3)
         s.key("alt+Escape")
-        check("overlay started", wait(lambda: s.slate_pids(), 10))
-        pid = s.slate_pids()[0]
+        check("overlay started", wait(lambda: s.griffel_pids(), 10))
+        pid = s.griffel_pids()[0]
         wait(lambda: s.windows_of(pid), 10)
         time.sleep(0.4)
         # Find the row with the text (the input field fills the window, the text is centered)
@@ -48,7 +48,7 @@ def main():
         check("area pixelated (text no longer high-contrast)", contrast(after, row, 10, 300) < 120)
 
         s.key("Return")  # copy and quit -> history gets saved
-        check("quit", wait(lambda: not s.slate_pids(), 10))
+        check("quit", wait(lambda: not s.griffel_pids(), 10))
         entries = s.history_entries()
         check("history entry exists", len(entries) == 1)
         if entries:

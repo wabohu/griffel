@@ -26,8 +26,8 @@ def write(s, x, y, text):
 def main():
     with Session("text-font") as s:
         s.key("alt+Escape")
-        check("overlay started", wait(lambda: s.slate_pids(), 10))
-        wait(lambda: s.windows_of(s.slate_pids()[0]), 10)
+        check("overlay started", wait(lambda: s.griffel_pids(), 10))
+        wait(lambda: s.windows_of(s.griffel_pids()[0]), 10)
         time.sleep(0.4)
         s.key("t")
         write(s, 300, 300, "normal text")
@@ -42,7 +42,7 @@ def main():
         s.screenshot("01-texts")
         s.key("Escape")
         s.key("Return")
-        check("quit", wait(lambda: not s.slate_pids(), 10))
+        check("quit", wait(lambda: not s.griffel_pids(), 10))
         entries = s.history_entries()
         texts = sorted((e for e in load_elements(entries[-1]) if hasattr(e, "font_kind")),
                        key=lambda e: e.pos().y()) if entries else []

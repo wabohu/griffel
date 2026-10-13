@@ -152,7 +152,7 @@ class BoardMixin:
     # --- Window ---
     def update_title(self):
         name = Path(self.document_path).name if self.document_path else "new"
-        self.setWindowTitle(f"slate – Whiteboard – {name}")
+        self.setWindowTitle(f"griffel – Whiteboard – {name}")
 
     def confirm_close(self):
         """Unsaved changes? Ask: save, discard or cancel."""
@@ -164,7 +164,7 @@ class BoardMixin:
                 return self.undo_stack.isClean()
             return choice == 1  # cancel or Esc: keep open
         answer = QMessageBox.question(
-            self, "slate", "The whiteboard has unsaved changes. Save?",
+            self, "griffel", "The whiteboard has unsaved changes. Save?",
             QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel, QMessageBox.Save)
         if answer == QMessageBox.Save:
             self.save_drawing()

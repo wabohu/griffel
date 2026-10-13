@@ -1,8 +1,8 @@
 /**
- * Compact prompt for slate (e.g. "Save / Discard / Cancel").
+ * Compact prompt for griffel (e.g. "Save / Discard / Cancel").
  *
  * Colors: your ~/.config/rofi/colors.rasi is additionally loaded on each call,
- * if it exists (slate passes it via -theme-str). If it is missing, the
+ * if it exists (griffel passes it via -theme-str). If it is missing, the
  * values after the comma in var(...) apply (Tokyo Night Storm).
  */
 * {

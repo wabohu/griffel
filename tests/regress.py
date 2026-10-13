@@ -22,13 +22,13 @@ REFERENCE = Path(__file__).resolve().parent / "regress_reference.png"
 
 # Must happen before the first Qt import
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
-_home = tempfile.mkdtemp(prefix="slate-test-")
+_home = tempfile.mkdtemp(prefix="griffel-test-")
 os.environ["HOME"] = _home
 os.environ["XDG_CONFIG_HOME"] = str(Path(_home) / ".config")
 os.environ["XDG_RUNTIME_DIR"] = str(Path(_home) / "run")  # e.g. editable copy (Ctrl+C), never the real one
 (Path(_home) / "run").mkdir()
-(Path(_home) / ".config" / "slate").mkdir(parents=True)
-(Path(_home) / ".config" / "slate" / "config.toml").write_text(
+(Path(_home) / ".config" / "griffel").mkdir(parents=True)
+(Path(_home) / ".config" / "griffel" / "config.toml").write_text(
     '[tools]\norder = ["freehand", "line", "arrow", "rect", "ellipse", "text"]\n'
     'default = "freehand"\n[colors]\ndefault = "red"\n'
     '[ui]\nshow_bar = true\n'  # bar in the image, so the reference covers it too

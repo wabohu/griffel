@@ -2,7 +2,7 @@
 """Bring your own config up to date with the template: take over new entries from
 config.example.toml, keep your own values.
 
-    python scripts/sync_config.py            # update ~/.config/slate/config.toml
+    python scripts/sync_config.py            # update ~/.config/griffel/config.toml
     python scripts/sync_config.py --dry-run  # only show what would change
 
 Result = text of the template (with all comments), in it:
@@ -175,7 +175,7 @@ def merge(template_text, user_text):
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--dry-run", action="store_true", help="only show")
-    parser.add_argument("--config", type=Path, default=None, help="instead of ~/.config/slate/config.toml")
+    parser.add_argument("--config", type=Path, default=None, help="instead of ~/.config/griffel/config.toml")
     args = parser.parse_args()
     target = args.config or config_path()
     if not target.is_file():

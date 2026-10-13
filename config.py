@@ -1,4 +1,4 @@
-"""The tool's own configuration: ~/.config/slate/config.toml
+"""The tool's own configuration: ~/.config/griffel/config.toml
 
 Deliberately without Qt, run it directly to test:
 
@@ -15,7 +15,7 @@ from pathlib import Path
 
 def config_path():
     base = os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config"
-    return Path(base) / "slate" / "config.toml"
+    return Path(base) / "griffel" / "config.toml"
 
 
 def load_config(path=None):
