@@ -26,9 +26,9 @@ import tomllib
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-SRC = REPO / "src" / "griffel"  # flat imports (transition, docs/notes/plan-pakete.md step 1)
+SRC = REPO / "src"  # import griffel from the source folder, never an installed one
 sys.path.insert(0, str(SRC))
-from config import config_path  # noqa: E402
+from griffel.config import config_path  # noqa: E402
 
 TEMPLATE = REPO / "config.example.toml"
 HEADER_RE = re.compile(r"^\s*\[([^\[\]]+)\]\s*(#.*)?$")

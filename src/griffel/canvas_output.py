@@ -20,14 +20,14 @@ from pathlib import Path
 from PySide6.QtCore import QPointF, QRectF
 from PySide6.QtGui import QCursor, QGuiApplication, QImage, QPainter
 
-from commands import AddItemCommand
-from document import build_document, elements_from_dicts, save_document
-from elements import ImageElement, ShapeElement, blur_block, new_id, pixelate
-from export import (copy_data_to_clipboard, copy_text_to_clipboard, copy_to_clipboard, data_from_clipboard,
+from griffel.commands import AddItemCommand
+from griffel.document import build_document, elements_from_dicts, save_document
+from griffel.elements import ImageElement, ShapeElement, blur_block, new_id, pixelate
+from griffel.export import (copy_data_to_clipboard, copy_text_to_clipboard, copy_to_clipboard, data_from_clipboard,
                     new_file_path, png_bytes, render_scene, save_png, short_path)
-from notify import NOT_AVAILABLE, ask, notify
-from settings import BOARD_EXPORT_MARGIN
-from tools import Tool
+from griffel.notify import NOT_AVAILABLE, ask, notify
+from griffel.settings import BOARD_EXPORT_MARGIN
+from griffel.tools import Tool
 
 # Copied elements in the clipboard: own data type, JSON as in the file format
 ELEMENTS_MIME = "application/x-griffel-elements"

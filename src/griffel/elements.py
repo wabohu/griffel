@@ -14,8 +14,8 @@ from PySide6.QtGui import QColor, QFont, QFontDatabase, QImage, QPainterPath, QP
 from PySide6.QtWidgets import (QGraphicsItem, QGraphicsPathItem, QGraphicsTextItem, QStyle,
                                QStyleOptionGraphicsItem)
 
-from colors import contrast
-from tools import RECT_RADIUS, Tool, marker_radius, shape_path
+from griffel.colors import contrast
+from griffel.tools import RECT_RADIUS, Tool, marker_radius, shape_path
 
 
 

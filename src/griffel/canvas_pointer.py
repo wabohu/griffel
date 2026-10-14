@@ -22,7 +22,7 @@ import math
 from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QColor, QCursor, QPainter, QPainterPath, QPen, QPixmap
 
-from tools import Tool
+from griffel.tools import Tool
 
 # All sizes for a screen height of 1080 px, multiplied by ui_scale
 CURSOR_ARM = 8          # length of the crosshair arms

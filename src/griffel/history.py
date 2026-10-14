@@ -15,7 +15,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from export import new_file_path
+from griffel.export import new_file_path
 
 _NAME_RE = re.compile(r"^griffel_(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})(?:_\d+)?\.png$")
 

@@ -176,7 +176,7 @@ def keyboard(keymap, tools, board):
     """What the keys of the keyboard picture do in the current mode:
     {key: {"plain" / "shift": (Tool or None, short label)}}. Tools by their slot, the other
     actions by their keys from DESCRIPTIONS; colors, sizes and hjkl have their own places."""
-    from tools import Tool  # here, so the module stays importable without Qt
+    from griffel.tools import Tool  # here, so the module stays importable without Qt
     mode = BOARD if board else SCREENSHOT
     actions = [("tool_select", Tool.SELECT), ("tool_marker", Tool.MARKER)]
     actions += [(f"tool_{i}", tool) for i, tool in enumerate(tools, start=1)]
@@ -200,7 +200,7 @@ def overview(keymap, tools, color_count, size_count, board):
     color_hint / size_hint: addition to the heading (common modifier, cycling, wheel);
     keyboard: see keyboard(); mouse: [(mouse, description)];
     lists: [(group, [(keys, description)])] without the keys on the keyboard picture."""
-    from tools import Tool  # here, so the module stays importable without Qt
+    from griffel.tools import Tool  # here, so the module stays importable without Qt
 
     def keys(action):
         return ", ".join(display(label) for label in keymap.labels(action))

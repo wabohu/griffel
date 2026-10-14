@@ -28,8 +28,8 @@ from pathlib import Path
 from PySide6.QtCore import QRectF
 from PySide6.QtGui import QColor, QImage, QImageReader
 
-from elements import ImageElement, ShapeElement, TextElement
-from export import png_bytes, short_path
+from griffel.elements import ImageElement, ShapeElement, TextElement
+from griffel.export import png_bytes, short_path
 
 FORMAT = "griffel"
 VERSION = 1

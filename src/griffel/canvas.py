@@ -11,21 +11,21 @@ from PySide6.QtCore import QEvent, QRectF, Qt, QTimer
 from PySide6.QtGui import QColor, QCursor, QFontDatabase, QPainter, QPixmap, QUndoStack
 from PySide6.QtWidgets import QApplication, QFrame, QGraphicsScene, QGraphicsView
 
-from canvas_board import BoardMixin
-from canvas_crop import CropMixin
-from canvas_history import HistoryMixin
-from canvas_input import InputMixin
-from canvas_output import OutputMixin
-from canvas_pointer import PointerMixin
-from commands import property_command
-from config import load_config
-from connectors import update_all
-from elements import ImageElement, ShapeElement, TextElement, is_label, set_mono_family
-from settings import BOARD_EXTENT, HIT_TOLERANCE, ROTATE_STEP, SIZE_LEVELS, Settings
-from tools import Tool, tool_icon
-from shortcuts import overview
-from ui import HelpPanel, MainBar, PaletteBar, SizeBar, Toast, ToolBar, ui_scale
-from wm import restore_focus
+from griffel.canvas_board import BoardMixin
+from griffel.canvas_crop import CropMixin
+from griffel.canvas_history import HistoryMixin
+from griffel.canvas_input import InputMixin
+from griffel.canvas_output import OutputMixin
+from griffel.canvas_pointer import PointerMixin
+from griffel.commands import property_command
+from griffel.config import load_config
+from griffel.connectors import update_all
+from griffel.elements import ImageElement, ShapeElement, TextElement, is_label, set_mono_family
+from griffel.settings import BOARD_EXTENT, HIT_TOLERANCE, ROTATE_STEP, SIZE_LEVELS, Settings
+from griffel.tools import Tool, tool_icon
+from griffel.shortcuts import overview
+from griffel.ui import HelpPanel, MainBar, PaletteBar, SizeBar, Toast, ToolBar, ui_scale
+from griffel.wm import restore_focus
 
 # All element kinds (selection, saving, stacking order …)
 ELEMENT_CLASSES = (ShapeElement, TextElement, ImageElement)

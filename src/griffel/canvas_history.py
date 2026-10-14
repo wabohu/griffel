@@ -24,9 +24,9 @@ import sys
 
 from PySide6.QtGui import QImage, QPixmap
 
-import history
-from document import build_document, load_document, save_document
-from export import render_scene
+from griffel import history
+from griffel.document import build_document, load_document, save_document
+from griffel.export import render_scene
 
 HISTORY_SAVE_DELAY_MS = 1000  # this long quiet after a change, then it is saved
 

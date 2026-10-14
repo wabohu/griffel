@@ -9,10 +9,11 @@ Must stay executable: a symlink in ~/.local/bin can point to it (hotkeys).
 import sys
 from pathlib import Path
 
-# Transition (plan-pakete.md, step 1): the modules still import each other flat
-sys.path.insert(0, str(Path(__file__).resolve().parent / "src" / "griffel"))
+# Not "griffel.py": the folder of the script comes first in sys.path, "import griffel"
+# would then find the script itself instead of the package in src/
+sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 
-from app import main  # noqa: E402
+from griffel.app import main  # noqa: E402
 
 if __name__ == "__main__":
     main()

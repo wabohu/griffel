@@ -36,8 +36,8 @@ def quiet(func, *args):
 
 def main():
     app = QGuiApplication(sys.argv)  # noqa: F841  (KeyMap needs Qt)
-    import settings as st
-    from tools import RECT_RADIUS, Tool
+    from griffel import settings as st
+    from griffel.tools import RECT_RADIUS, Tool
 
     # Empty config: everything default, no crash
     s, _ = quiet(st.Settings, {}, False)
@@ -48,7 +48,7 @@ def main():
     check("empty: start color", s.swatches[s.default_color_index] == s.palette.lookup(st.DEFAULT_COLOR))
     check("empty: step sizes", s.move_steps == {False: st.DEFAULT_MOVE_STEP, True: st.DEFAULT_MOVE_STEP_FINE})
     check("empty: dunst and rofi", s.use_dunst and s.use_rofi and s.rofi_theme is None)
-    from history import default_history_dir
+    from griffel.history import default_history_dir
     check("empty: history on, default folder, 100", s.history_enabled and s.history_dir == default_history_dir()
           and s.history_keep == st.DEFAULT_HISTORY_KEEP)
     check("empty: bar off in screenshot mode", s.show_bar is False)
@@ -132,7 +132,7 @@ def main():
     # Monospace font: [text] mono_font, otherwise the terminal font from Alacritty
     import tempfile
 
-    import colors
+    from griffel import colors
     with tempfile.TemporaryDirectory() as tmp:
         base = Path(tmp)
         both = base / "both.toml"
@@ -155,8 +155,8 @@ def main():
           and s.mono_family is None)
 
     # Key overview (?): every action described, content per mode
-    import shortcuts
-    from keymap import DEFAULT_KEYS, KeyMap
+    from griffel import shortcuts
+    from griffel.keymap import DEFAULT_KEYS, KeyMap
     missing = [a for a in DEFAULT_KEYS if a not in shortcuts.DESCRIPTIONS and not shortcuts.GROUPED.match(a)]
     check(f"overview: every action has a description {missing or ''}", not missing)
     keymap = KeyMap({"keys": {"undo": "u"}, "tools": {"order": ["rect", "text"]}})

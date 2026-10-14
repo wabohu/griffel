@@ -18,7 +18,7 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-SRC = REPO / "src" / "griffel"  # flat imports (transition, docs/notes/plan-pakete.md step 1)
+SRC = REPO / "src"  # import griffel from the source folder, never an installed one
 REFERENCE = Path(__file__).resolve().parent / "regress_reference.png"
 
 # Must happen before the first Qt import
@@ -64,7 +64,7 @@ def draw_scene(canvas, view):
     QTest.mouseClick(view, Qt.LeftButton, pos=QPoint(60, 300))
     QTest.keyClicks(canvas, "Hallo Welt")
     key(Qt.Key_Escape)
-    from elements import TextElement
+    from griffel.elements import TextElement
     text = next(i for i in canvas.scene_.items() if isinstance(i, TextElement))
     start = canvas.mapFromScene(text.pos() + text.boundingRect().center())          # move the text
     QTest.mousePress(view, Qt.LeftButton, pos=start)
@@ -88,7 +88,7 @@ def draw_scene(canvas, view):
 
 def main():
     app = QApplication(sys.argv)  # noqa: F841  (must exist)
-    from canvas import Canvas
+    from griffel.canvas import Canvas
 
     background = QPixmap(1100, 500)
     background.fill(QColor("#3b4261"))

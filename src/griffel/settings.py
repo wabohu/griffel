@@ -11,13 +11,13 @@ from pathlib import Path
 
 from PySide6.QtGui import QColor
 
-from colors import load_palette, load_terminal_font
-from config import get_float, get_int, get_int_list, get_list, get_str
-from export import default_output_dir
-from history import default_history_dir
-from keymap import KeyMap
-from tools import RECT_RADIUS, Tool, parse_tool, tool_order
-from ui import Theme
+from griffel.colors import load_palette, load_terminal_font
+from griffel.config import get_float, get_int, get_int_list, get_list, get_str
+from griffel.export import default_output_dir
+from griffel.history import default_history_dir
+from griffel.keymap import KeyMap
+from griffel.tools import RECT_RADIUS, Tool, parse_tool, tool_order
+from griffel.ui import Theme
 
 # Fallbacks if your own config is missing or contains unusable values
 DEFAULT_TOOL = Tool.FREEHAND

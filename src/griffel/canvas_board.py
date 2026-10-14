@@ -14,10 +14,10 @@ from pathlib import Path
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QMessageBox
 
-from colors import adapt_color
-from commands import PropertyCommand
-from notify import NOT_AVAILABLE
-from settings import WHEEL_PAN_STEP, ZOOM_RANGE, ZOOM_STEP, clamp
+from griffel.colors import adapt_color
+from griffel.commands import PropertyCommand
+from griffel.notify import NOT_AVAILABLE
+from griffel.settings import WHEEL_PAN_STEP, ZOOM_RANGE, ZOOM_STEP, clamp
 
 
 class BoardMixin:

@@ -1,13 +1,12 @@
-#!/usr/bin/env python3
 """griffel: screenshot annotation tool and whiteboard (startup).
 
-    python griffel.py              annotate a screenshot of the monitor under the mouse
-    python griffel.py image.png    open a saved drawing or any PNG
-    python griffel.py --board      empty whiteboard in a normal window
-    python griffel.py --last       open the latest screenshot from the history
+    griffel              annotate a screenshot of the monitor under the mouse
+    griffel image.png    open a saved drawing or any PNG
+    griffel --board      empty whiteboard in a normal window
+    griffel --last       open the latest screenshot from the history
+    griffel --version
 
-Usage: docs/usage.md. The drawing surface is in canvas.py.
-Must stay executable: ~/.local/bin/griffel is a symlink to it (sxhkd).
+From the source folder: python run.py … Usage: docs/usage.md. The drawing surface is in canvas.py.
 """
 import argparse
 import sys
@@ -16,13 +15,14 @@ from pathlib import Path
 from PySide6.QtGui import QColor, QCursor, QGuiApplication, QPixmap
 from PySide6.QtWidgets import QApplication
 
-from canvas import Canvas
-from document import load_document
-import history
-from config import load_config
-from history import is_entry
-from notify import notify
-from settings import Settings
+from griffel import __version__
+from griffel.canvas import Canvas
+from griffel.document import load_document
+from griffel import history
+from griffel.config import load_config
+from griffel.history import is_entry
+from griffel.notify import notify
+from griffel.settings import Settings
 
 
 # --- Capture -----------------------------------------------------------------
@@ -41,6 +41,7 @@ def main():
                         help="empty whiteboard in a normal window instead of a screenshot")
     parser.add_argument("--last", action="store_true",
                         help="open the latest screenshot from the history (e.g. via a hotkey)")
+    parser.add_argument("--version", action="version", version=f"griffel {__version__}")
     args, qt_args = parser.parse_known_args()  # pass the rest (e.g. Qt options) on to Qt
     app = QApplication(sys.argv[:1] + qt_args)
 

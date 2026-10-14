@@ -26,9 +26,9 @@ from collections import Counter
 from PySide6.QtCore import QPointF, QRectF, QSize, Qt
 from PySide6.QtGui import QColor, QFont, QPainter, QPainterPath, QPen
 
-from commands import PropertyCommand
-from settings import HANDLE_GRAB, HANDLE_SIZE
-from tools import Tool
+from griffel.commands import PropertyCommand
+from griffel.settings import HANDLE_GRAB, HANDLE_SIZE
+from griffel.tools import Tool
 
 CLEAR_SAMPLES = 2000  # at most this many pixels around the area decide its fill color (Del)
 CROP_DIM = 110         # darkening outside the crop, 0-255

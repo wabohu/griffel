@@ -23,7 +23,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 OUT = Path(__file__).resolve().parent / "out"
 GRIFFEL = REPO / "run.py"
-SRC = REPO / "src" / "griffel"  # flat imports (transition, docs/notes/plan-pakete.md step 1)
+SRC = REPO / "src"  # import griffel from the source folder, never an installed one
 KEYSINK = Path(__file__).resolve().parent / "keysink.py"
 
 # Bindings in the test: start via Alt+Escape as in real use (via the executable run.py,
@@ -253,7 +253,7 @@ def load_drawing(path):
     """Read a saved drawing: (background, elements). The background is a QImage
     (screenshot) or a QColor (whiteboard)."""
     _qt()
-    from document import load_document
+    from griffel.document import load_document
     background, elements, _, _ = load_document(path)
     return background, elements
 

@@ -13,7 +13,7 @@ import time
 from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QUndoCommand
 
-from elements import is_label
+from griffel.elements import is_label
 
 
 class AddItemCommand(QUndoCommand):

@@ -8,8 +8,8 @@ from PySide6.QtCore import QPointF, QRectF, QSize, QSizeF, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QFont, QFontDatabase, QFontMetricsF, QPainter, QPen
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QWidget
 
-from shortcuts import KEYBOARD_COLUMNS
-from tools import tool_icon
+from griffel.shortcuts import KEYBOARD_COLUMNS
+from griffel.tools import tool_icon
 
 
 class Theme:

@@ -17,14 +17,14 @@ import math
 from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QBrush, QColor, QPainter, QPainterPathStroker, QPen, QPolygonF, QTransform
 
-import connectors
-from colors import contrast
-from commands import (AddItemCommand, EditTextCommand, MoveItemCommand, PropertyCommand, RemoveItemCommand,
+from griffel import connectors
+from griffel.colors import contrast
+from griffel.commands import (AddItemCommand, EditTextCommand, MoveItemCommand, PropertyCommand, RemoveItemCommand,
                       ReorderCommand, SetLabelCommand, property_command)
-from elements import LABEL_TOOLS, ShapeElement, TextElement, is_label
-from settings import (HANDLE_GRAB, HANDLE_SIZE, ROTATE_HANDLE_OFFSET, STROKE_WIDTH_RANGE,
+from griffel.elements import LABEL_TOOLS, ShapeElement, TextElement, is_label
+from griffel.settings import (HANDLE_GRAB, HANDLE_SIZE, ROTATE_HANDLE_OFFSET, STROKE_WIDTH_RANGE,
                       TEXT_SIZE_RANGE, WHEEL_STROKE_STEP, WHEEL_TEXT_STEP, clamp)
-from tools import Tool
+from griffel.tools import Tool
 
 # Width of the highlight band around a docking target (screen pixels)
 DOCK_HINT_WIDTH = 10

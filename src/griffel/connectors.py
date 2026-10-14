@@ -15,8 +15,8 @@ import math
 from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QPainterPath, QPainterPathStroker
 
-from elements import ImageElement, ShapeElement, TextElement, is_label
-from tools import Tool
+from griffel.elements import ImageElement, ShapeElement, TextElement, is_label
+from griffel.tools import Tool
 
 # Lines and arrows can be connectors; these shapes can be docking targets
 CONNECTOR_TOOLS = (Tool.LINE, Tool.ARROW)

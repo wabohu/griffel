@@ -29,7 +29,7 @@ def check(name, condition):
 
 
 def make_canvas(pixmap, elements=(), path=None):
-    from canvas import Canvas
+    from griffel.canvas import Canvas
     canvas = Canvas(QGuiApplication.primaryScreen(), pixmap, elements, path)
     canvas.resize(1100, 500)
     canvas.show_overlay()
@@ -39,11 +39,11 @@ def make_canvas(pixmap, elements=(), path=None):
 
 def main():
     app = QApplication(sys.argv)  # noqa: F841
-    from canvas import Canvas
-    from commands import PropertyCommand
-    from elements import TextElement
-    from document import load_document
-    from export import default_output_dir
+    from griffel.canvas import Canvas
+    from griffel.commands import PropertyCommand
+    from griffel.elements import TextElement
+    from griffel.document import load_document
+    from griffel.export import default_output_dir
 
     # Mixins of the Canvas (docs/notes/plan-aufteilung.md): no method may be in two classes,
     # otherwise one silently hides the other
@@ -52,6 +52,13 @@ def main():
     names = [{n for n in c.__dict__ if not n.startswith("__")} for c in parts]
     clashes = {n for i, a in enumerate(names) for b in names[i + 1:] for n in a & b}
     check(f"Canvas mixins without duplicate methods ({', '.join(c.__name__ for c in parts)})", not clashes)
+
+    # Every module only as griffel.x: loaded flat as well (src/griffel/ in sys.path), it would
+    # exist twice, and replacing something in one copy would miss the other
+    import griffel
+    own = {p.stem for p in Path(griffel.__file__).parent.glob("*.py")} - {"__init__", "__main__"}
+    flat = sorted(own & set(sys.modules))
+    check(f"modules only loaded as griffel.<name> ({len(own)} modules, flat: {flat})", not flat)
 
     background = QPixmap(1100, 500)
     background.fill(QColor("#3b4261"))
@@ -111,7 +118,7 @@ def main():
     check("move saved", match and match[0].pos() == moved.pos())
 
     # Mouse pointer: crosshair without center, circle = stroke width, pen color; select/pointing: arrow
-    from tools import Tool
+    from griffel.tools import Tool
     cur = make_canvas(QPixmap(800, 400))
     cur.set_tool(Tool.FREEHAND)
     cur.set_size(0)
@@ -370,7 +377,7 @@ def main():
 
     # Rotate (Q / Shift+Q): around the middle, presses merged into one undo step, groups together,
     # blur and markers left out, handles on rotated elements, saving keeps the rotation
-    from elements import ImageElement as _ImageElement
+    from griffel.elements import ImageElement as _ImageElement
     plain_bg = QPixmap(800, 400)
     plain_bg.fill(QColor("#3b4261"))  # unfilled pixmaps contain random memory
     ro = make_canvas(plain_bg)
@@ -480,7 +487,7 @@ def main():
 
     # Labels (text in shapes, step 1: data model): child of the shape, wraps at its width,
     # centered, color of the shape, moves/resizes/rotates along, saved with the shape
-    from elements import LABEL_PADDING, ShapeElement as _Shape, is_label
+    from griffel.elements import LABEL_PADDING, ShapeElement as _Shape, is_label
     lb = make_canvas(plain_bg)
     lv = lb.viewport()
     lb.set_tool(Tool.RECT)
@@ -599,7 +606,7 @@ def main():
     QTest.keyClick(lc, Qt.Key_Escape)
     # Copy/paste/duplicate (Qt clipboard, never the real one) and into the whiteboard:
     # the label comes along as an independent copy
-    import export as _exp
+    from griffel import export as _exp
     _exp.shutil.which = lambda name: None
     lc.scene_.clearSelection()
     rect.setSelected(True)
@@ -628,8 +635,8 @@ def main():
     # Connectors, step 1 (data model, no mouse yet): a docked arrow aims at the middle of its
     # targets and ends at their outline; it follows moving/rotating/resizing, a deleted target
     # leaves the end free, undo docks it again; saved with the arrow
-    import connectors
-    from commands import AddItemCommand as _Add, MoveItemCommand, RemoveItemCommand as _Remove
+    from griffel import connectors
+    from griffel.commands import AddItemCommand as _Add, MoveItemCommand, RemoveItemCommand as _Remove
     cn = make_canvas(plain_bg)
 
     def new_shape(tool, a, b):
@@ -718,7 +725,7 @@ def main():
     check("screenshot mode: an arrow drawn from a rectangle's outline stays free",
           cs.elements()[-1].ends == [None, None] and cs.dock_hint is None)
     cs.close()
-    from canvas import Canvas
+    from griffel.canvas import Canvas
     cm = Canvas(QGuiApplication.primaryScreen(), None, board=True)
     cm.resize(1100, 500)
     cm.show_window()
@@ -811,7 +818,7 @@ def main():
     cm.undo_stack.undo()
     check("Q on the arrow alone undocks it; undo docks it again",
           rotated_free and docked_arrow.ends == [left.id, right.id])
-    import export as _exp2
+    from griffel import export as _exp2
     _exp2.shutil.which = lambda name: None  # never the real clipboard
     select_only(left, right, docked_arrow)
     before = set(cm.elements())
@@ -830,7 +837,7 @@ def main():
 
     # Connectors, step 4: text on lines/arrows: double click on the arrow, text in the middle of
     # the line, upright, in a small box; follows when the docked shapes move; saved
-    from elements import LABEL_BOX_PADDING
+    from griffel.elements import LABEL_BOX_PADDING
     from PySide6.QtWidgets import QGraphicsTextItem  # the rectangle Qt would use without the box
 
     def arrow_mid():
@@ -910,7 +917,7 @@ def main():
     zo.close()
 
     # Copy/paste/duplicate (Qt clipboard, never the real one: xclip turned off)
-    import export as _export
+    from griffel import export as _export
     _export.shutil.which = lambda name: None
     cp = make_canvas(QPixmap(800, 400))
     cpv = cp.viewport()
@@ -952,8 +959,8 @@ def main():
 
     # Image elements: crop with markings editable into the whiteboard, paste foreign images
     from PySide6.QtCore import QByteArray, QMimeData
-    from elements import ImageElement
-    from export import png_bytes
+    from griffel.elements import ImageElement
+    from griffel.export import png_bytes
     shot = make_canvas(QPixmap(800, 400))
     sv = shot.viewport()
     shot.set_tool(Tool.MARKER)
@@ -1019,7 +1026,7 @@ def main():
     little.close()
 
     # History (roadmap 10): one entry per session, browse with ← →
-    import history
+    from griffel import history
 
     def draw_rect(c, x):
         view = c.viewport()
@@ -1069,7 +1076,7 @@ def main():
     board_h.close()
 
     # Whiteboard: empty area, save, load again as whiteboard
-    import export
+    from griffel import export
     export.shutil.which = lambda name: None  # never touch the real clipboard
     board = Canvas(QGuiApplication.primaryScreen(), None, board=True)
     board.resize(900, 500)
@@ -1116,7 +1123,7 @@ def main():
     check("background saved", bbg2 == board2.board_color != old_bg)
 
     # Light background: colors are shown darkened, the base color is saved
-    from colors import LIGHT_CONTRAST, contrast
+    from griffel.colors import LIGHT_CONTRAST, contrast
     paper = QColor("#f8f6f0")
     light = Canvas(QGuiApplication.primaryScreen(), None, board=True, board_color=paper)
     light.resize(900, 500)
@@ -1146,7 +1153,7 @@ def main():
 
     # Monospace text (Roadmap 16): saved as kind ("font": "mono"), older files = normal
     from PySide6.QtGui import QFontInfo
-    from elements import ShapeElement
+    from griffel.elements import ShapeElement
     mono = TextElement(QPointF(10, 10), QColor("white"), 20, text="ls -la", kind="mono")
     plain = TextElement(QPointF(10, 60), QColor("white"), 20, text="hello")
     data = mono.to_dict()
