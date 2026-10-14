@@ -2,3 +2,4 @@ __pycache__/
 __pycache__
 tests/gui/out/
 .impeccable/
+CLAUDE.local.md
