@@ -10,7 +10,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-ROFI_THEME = Path(__file__).resolve().parent / "rofi" / "griffel.rasi"
+ROFI_THEME = Path(__file__).resolve().parent / "data" / "griffel.rasi"
 ROFI_COLORS = Path.home() / ".config" / "rofi" / "colors.rasi"
 NOT_AVAILABLE = object()  # return value of ask() when rofi is not usable
 

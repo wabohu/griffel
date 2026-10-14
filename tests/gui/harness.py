@@ -22,10 +22,11 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = Path(__file__).resolve().parent / "out"
-GRIFFEL = REPO / "griffel.py"
+GRIFFEL = REPO / "run.py"
+SRC = REPO / "src" / "griffel"  # flat imports (transition, docs/notes/plan-pakete.md step 1)
 KEYSINK = Path(__file__).resolve().parent / "keysink.py"
 
-# Bindings in the test: start via Alt+Escape as in real use (via the executable griffel.py,
+# Bindings in the test: start via Alt+Escape as in real use (via the executable run.py,
 # so it also checks the executable bit), plus two test hotkeys
 SXHKDRC = """\
 alt + Escape
@@ -156,14 +157,14 @@ class Session:
 
     # --- processes and windows ---
     def griffel_pids(self):
-        """PIDs of griffel.py on THIS display (never your real instances)."""
+        """PIDs of griffel (run.py) on THIS display (never your real instances)."""
         pids = []
         for proc in Path("/proc").iterdir():
             if not proc.name.isdigit():
                 continue
             try:
                 cmdline = (proc / "cmdline").read_bytes()
-                if b"griffel.py" not in cmdline:
+                if str(GRIFFEL).encode() not in cmdline:
                     continue
                 environ = (proc / "environ").read_bytes().split(b"\0")
             except OSError:
@@ -234,8 +235,8 @@ class Session:
 def _qt():
     """Qt in the test process itself, without a screen (to read images and files)."""
     os.environ["QT_QPA_PLATFORM"] = "offscreen"
-    if str(REPO) not in sys.path:
-        sys.path.insert(0, str(REPO))
+    if str(SRC) not in sys.path:
+        sys.path.insert(0, str(SRC))
     # QApplication, not only QGuiApplication: text elements (QGraphicsTextItem) need widgets
     from PySide6.QtWidgets import QApplication
     global _app

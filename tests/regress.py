@@ -18,6 +18,7 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
+SRC = REPO / "src" / "griffel"  # flat imports (transition, docs/notes/plan-pakete.md step 1)
 REFERENCE = Path(__file__).resolve().parent / "regress_reference.png"
 
 # Must happen before the first Qt import
@@ -33,7 +34,7 @@ os.environ["XDG_RUNTIME_DIR"] = str(Path(_home) / "run")  # e.g. editable copy (
     'default = "freehand"\n[colors]\ndefault = "red"\n'
     '[ui]\nshow_bar = true\n'  # bar in the image, so the reference covers it too
 )
-sys.path.insert(0, str(REPO))
+sys.path.insert(0, str(SRC))
 
 from PySide6.QtCore import QPoint, Qt  # noqa: E402
 from PySide6.QtGui import QColor, QGuiApplication, QImage, QPixmap  # noqa: E402

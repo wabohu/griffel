@@ -26,7 +26,8 @@ import tomllib
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(REPO))
+SRC = REPO / "src" / "griffel"  # flat imports (transition, docs/notes/plan-pakete.md step 1)
+sys.path.insert(0, str(SRC))
 from config import config_path  # noqa: E402
 
 TEMPLATE = REPO / "config.example.toml"
