@@ -10,21 +10,19 @@ Jede Phase endet lauffähig mit grünen Tests.
 - **Name: entschieden, `griffel`** (2026-10-10). `slate` ist im AUR (`slate`, `slate-git`) und
   auf PyPI vergeben, `griffel` überall frei, auch `griffel-git`. Ein Griffel ist der Stift zur
   Schiefertafel; englisch „GRIF-ul“. Umbenennung vor Phase 1 als eigener Commit, Plan in
-  `docs/plan-umbenennung-griffel.md`. Paket, Befehl, Modul und Repo heißen gleich
-- **Was öffentlich bleibt:** `CLAUDE.md` und die deutschen `docs/plan-*.md`/`roadmap.md`.
-  Varianten: (a) bleiben, Ordner `docs/notes/` mit Hinweis „interne Arbeitsnotizen, Deutsch“,
-  (b) raus aus dem Repo (ab jetzt, Historie bleibt), (c) englische Kurzfassung als
-  `docs/architecture.md`/`CONTRIBUTING.md`, deutsche Notizen privat. Empfehlung: (c),
-  `CLAUDE.md` darf bleiben (zeigt, wie das Projekt entstanden ist, hilft Mitwirkenden mit
-  Claude Code), aber ohne „meine Tastatur“, „mein Bildschirm“. Hinweis: Das Repo ist schon
-  öffentlich samt Historie, (b) schafft also Ordnung, keine Geheimhaltung
+  `docs/notes/plan-umbenennung-griffel.md`. Paket, Befehl, Modul und Repo heißen gleich
+- **Was öffentlich bleibt: entschieden** (2026-10-14). Alles bleibt öffentlich, aber getrennt:
+  deutsche Arbeitsnotizen (`roadmap.md`, `plan-*.md`) in `docs/notes/` mit englischem Hinweis
+  (`docs/notes/README.md`). `CLAUDE.md` wird englisch und enthält nur Projektwissen; meine
+  persönlichen Arbeitsregeln (Sprache, Bestätigung vor Commit/Push, Handtests, Qt erklären,
+  Symlink/sxhkd) stehen in `CLAUDE.local.md` (nicht im Repo, `.gitignore`). Englische
+  `docs/architecture.md`/`CONTRIBUTING.md` in Phase 3, weitgehend aus `CLAUDE.md`
 - **Repo:** `wabohu/slate` ist bereits öffentlich, alle 82 Commits auf `main` sichtbar (geprüft
   2026-10-10). Also keine History umschreiben, nur umbenennen in `wabohu/griffel` (GitHub
   leitet weiter). Autor ist die noreply-Adresse, keine Secrets gefunden
 - **Versionierung:** SemVer, erstes Release `v0.1.0` (signalisiert: benutzbar, aber jung)
-- **Lizenz:** Kein Quelltext hat einen Lizenz-Header, die README sagt nur „GPL-3.0“. Entscheiden:
-  `GPL-3.0-only` oder `GPL-3.0-or-later`, dann als SPDX in `pyproject.toml`, README und PKGBUILD;
-  optional eine Zeile `# SPDX-License-Identifier: …` je Datei
+- **Lizenz: entschieden, `GPL-3.0-or-later`** (2026-10-14). SPDX in README (erledigt),
+  `pyproject.toml` und PKGBUILD; optional eine Zeile `# SPDX-License-Identifier: GPL-3.0-or-later` je Datei
 
 ## Phase 1: Paketstruktur (Roadmap 20, flach)
 Voraussetzung für pipx und AUR, weil 22 flache Module sonst als Top-Level-Module
@@ -70,7 +68,7 @@ griffel/
 - `--version` aus `griffel.__version__`, die einzige Stelle für die Version
 - Betrifft auch `scripts/sync_config.py`, den Git-Hook, `tests/regress.py` (REPO-Pfad),
   `tests/gui/harness.py` und CLAUDE.md
-- Plan dazu wie üblich vorher in `docs/plan-pakete.md`, Umbau in kleinen Commits
+- Plan dazu wie üblich vorher in `docs/notes/plan-pakete.md`, Umbau in kleinen Commits
   (erst verschieben, dann Imports, dann Tests, dann Entry Point)
 
 ## Phase 2: Abhängigkeiten zu meinem System lösen
@@ -220,7 +218,7 @@ pkgrel=1
 pkgdesc="Screenshot annotation tool and whiteboard for X11"
 arch=('any')
 url="https://github.com/wabohu/griffel"
-license=('GPL-3.0-or-later')   # oder -only, Phase 0
+license=('GPL-3.0-or-later')
 depends=('python>=3.11' 'pyside6' 'xclip')
 makedepends=('python-build' 'python-installer' 'python-wheel' 'python-setuptools')
 optdepends=('xdotool: give the focus back on close (needed outside herbstluftwm)'
@@ -275,8 +273,6 @@ package() {
 - Dann Release `v0.1.0`, AUR-Push, evtl. Ankündigung (r/unixporn, r/archlinux, herbstluftwm-Community)
 
 ## Offene Fragen
-- Lizenz: `GPL-3.0-only` oder `-or-later` (Phase 0)
-- CLAUDE.md und deutsche Notizen: öffentlich oder nicht (das Repo ist es schon samt Historie)
 - Unterstützte Ziele für 0.1.0: Vorschlag „X11 + beliebiger WM, getestet mit herbstluftwm und i3“,
   KDE/GNOME auf Xorg als „sollte gehen“, damit der Bypass-Fokus das Release nicht aufhält
 - pipx/PyPI zusätzlich zum AUR? Der Name `griffel` ist auf PyPI frei

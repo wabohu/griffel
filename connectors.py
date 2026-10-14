@@ -8,7 +8,7 @@ every change (Canvas.update_connectors), so moving, rotating, resizing or deleti
 needs no extra work, and undo needs nothing of its own either.
 
 Without Canvas dependencies (like tools.py), so it can be tested on its own.
-Plan: docs/plan-verbinder.md.
+Plan: docs/notes/plan-verbinder.md.
 """
 import math
 

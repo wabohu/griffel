@@ -3,7 +3,7 @@
 This file holds setup, state, tool/color/size, bars, selection helpers and keys.
 More methods come from the mixins: canvas_input.py (mouse, text, handles, mouse wheel),
 canvas_board.py (whiteboard), canvas_output.py (copy, save, messages),
-canvas_history.py (history). Fixed values from the config: settings.py. See docs/plan-aufteilung.md.
+canvas_history.py (history). Fixed values from the config: settings.py. See docs/notes/plan-aufteilung.md.
 """
 import sys
 
@@ -45,7 +45,7 @@ class Canvas(InputMixin, BoardMixin, OutputMixin, HistoryMixin, PointerMixin, Cr
     and background), canvas_output.py (copy, save, messages),
     canvas_history.py (history), canvas_pointer.py (mouse cursor, spotlight, magnifier),
     canvas_crop.py (crop);
-    see docs/plan-aufteilung.md."""
+    see docs/notes/plan-aufteilung.md."""
 
     def __init__(self, screen, pixmap, elements=(), document_path=None, board=False, board_color=None):
         """pixmap: background (screenshot or loaded image), None on the whiteboard;

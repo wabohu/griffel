@@ -45,7 +45,7 @@ def main():
     from document import load_document
     from export import default_output_dir
 
-    # Mixins of the Canvas (docs/plan-aufteilung.md): no method may be in two classes,
+    # Mixins of the Canvas (docs/notes/plan-aufteilung.md): no method may be in two classes,
     # otherwise one silently hides the other
     parts = [c for c in Canvas.__mro__ if c.__module__ not in ("builtins",) and
              not c.__module__.startswith(("PySide6", "Shiboken"))]

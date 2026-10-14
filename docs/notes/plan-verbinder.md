@@ -6,7 +6,7 @@ in der Hintergrundfarbe
 
 Ziel: Linien und Pfeile, deren Enden an Formen andocken. Verschiebt, dreht oder vergrößert
 man die Form, folgt das Ende. Zum Schluss Text an Pfeilen. Baut auf den Beschriftungen auf
-(Teil 1, `docs/plan-beschriftung.md`) und auf D5 in der Roadmap.
+(Teil 1, `docs/notes/plan-beschriftung.md`) und auf D5 in der Roadmap.
 
 ## Entschieden (2026-10-05)
 

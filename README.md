@@ -89,4 +89,4 @@ python tests/gui/run.py      # needs Xvfb, herbstluftwm, sxhkd, xdotool
 
 ## License
 
-GPL-3.0, see [LICENSE](LICENSE).
+GPL-3.0-or-later, see [LICENSE](LICENSE).

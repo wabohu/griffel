@@ -1,6 +1,6 @@
 """UI elements that lie above the drawing surface.
 
-Structure (variant A from docs/plan-bedienung.md): a MainBar with a common
+Structure (variant A from docs/notes/plan-bedienung.md): a MainBar with a common
 background, in it side by side the groups (tools | colors | size),
 each group a CellBar.
 """

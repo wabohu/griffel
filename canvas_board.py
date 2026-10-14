@@ -3,7 +3,7 @@ prompt on close. Only active on the whiteboard (board=True).
 
 Qt/Python concept mixin: BoardMixin has no __init__ of its own and cannot run on
 its own. Canvas inherits from it (class Canvas(BoardMixin, QGraphicsView)), so the
-methods end up in the Canvas as if they were written there. See docs/plan-aufteilung.md.
+methods end up in the Canvas as if they were written there. See docs/notes/plan-aufteilung.md.
 
 Manages (created in Canvas.__init__): board_color, zoom_rest, overview_return.
 Reads from the Canvas: board, scene_, settings, palette_bar, toast, undo_stack,
