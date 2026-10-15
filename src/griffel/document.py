@@ -12,6 +12,9 @@ a JSON document:
       "crop": [x, y, width, height]   (optional: crop in scene coordinates, key y)
     }
 
+By default ([output] keep_full_screenshot = false) a drawing with a crop stores only the
+crop of the raw image, without "crop" (build_cropped_document); the history keeps all.
+
 Opening such a PNG with griffel makes everything editable again. A PNG without this
 data opens as a background. Programs that save the image again often discard
 the metadata; the own file stays untouched by that.
@@ -57,6 +60,22 @@ def build_document(background, elements, crop=None):
         "elements": [item.to_dict() for item in elements],
         **({"crop": [crop.x(), crop.y(), crop.width(), crop.height()]} if crop is not None else {}),
     }
+
+
+def build_cropped_document(background, elements, crop, factor):
+    """Document data with only the crop of the raw image ([output] keep_full_screenshot = false).
+
+    crop: QRectF in scene coordinates, inside the image; factor: image pixels per scene unit.
+    Elements that do not touch the crop are left out, the others move by -crop.topLeft()
+    (only "pos": points are relative to it, connectors refer to their targets by id). No
+    "crop" key: the file is simply a smaller screenshot, the frame cannot grow again.
+    """
+    area = QRectF(crop.x() * factor, crop.y() * factor, crop.width() * factor, crop.height() * factor)
+    kept = [item for item in elements if item.sceneBoundingRect().intersects(crop)]
+    document = build_document(background.copy(area.toRect()), kept)
+    for data in document["elements"]:
+        data["pos"] = [data["pos"][0] - crop.x(), data["pos"][1] - crop.y()]
+    return document
 
 
 def crop_from_data(value):

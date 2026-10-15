@@ -87,6 +87,13 @@ step_fine = 1      # Shift+h j k l
 # Folder for Ctrl+S (drawing) and Ctrl+E (export), PNG with a timestamp. ~ is allowed.
 # Default: ~/Pictures/griffel
 dir = "~/Pictures/griffel"
+# Editable files (Ctrl+S, Shift+Enter) of a screenshot with a crop (x):
+#   false = only the crop of the screenshot is stored, after opening again the frame cannot
+#           grow beyond it. Elements completely outside the crop are left out.
+#   true  = the whole screenshot is stored and the frame stays changeable; but whoever gets
+#           the file can get the whole screen out of it, not just what the picture shows.
+# For passing on, Ctrl+E exports a clean PNG without any editing data either way.
+keep_full_screenshot = false
 
 [pointer]
 # Pointing while teaching: e = spotlight, Shift+E = magnifier. Radii in pixels for a
@@ -100,7 +107,8 @@ lens_zoom = 2.0         # magnification of the magnifier (1.1-10)
 # History: every screenshot you change something on is saved automatically as an editable
 # PNG (shortly after each change and when quitting) and can be brought back with ← / →.
 # Screenshots without changes and whiteboards do not end up in the history.
-# An entry contains the screenshot twice (finished + raw), about 2-6 MB at 4K;
+# An entry contains the screenshot twice (finished + raw, always the whole screenshot, also
+# with a crop, so the frame stays changeable), about 2-6 MB at 4K;
 # so 100 entries take up to a few hundred MB.
 enabled = true
 dir = "~/.local/share/griffel/history"

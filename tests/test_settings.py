@@ -52,6 +52,7 @@ def main():
     check("empty: history on, default folder, 100", s.history_enabled and s.history_dir == default_history_dir()
           and s.history_keep == st.DEFAULT_HISTORY_KEEP)
     check("empty: bar off in screenshot mode", s.show_bar is False)
+    check("empty: editable files only keep the crop", s.keep_full_screenshot is False)
     check("empty: spotlight 90 px / 45 %, magnifier 100 px / 2x", s.spotlight_radius == 90 and s.lens_radius == 100
           and s.spotlight_dim == 45 and s.lens_zoom == 2.0)
     tuned, hints2 = quiet(st.Settings, {"pointer": {"spotlight_dim": 30, "lens_zoom": 3, "lens_radius": 0.5}}, False)
@@ -119,13 +120,13 @@ def main():
         "ui": {"messages": "toast", "dialogs": "qt"},
         "rect": {"radius": 0},
         "move": {"step": 25, "step_fine": 2},
-        "output": {"dir": "~/somewhere"},
+        "output": {"dir": "~/somewhere", "keep_full_screenshot": True},
         "history": {"enabled": False, "keep": 5, "dir": "~/my-history"},
     }
     s, _ = quiet(st.Settings, good, False)
     check("valid: taken over", s.stroke_widths == [1, 3, 5, 7] and s.default_size_level == 3
           and s.rect_radius == 0 and s.move_steps == {False: 25, True: 2}
-          and not s.use_dunst and not s.use_rofi and s.output_dir == "~/somewhere"
+          and not s.use_dunst and not s.use_rofi and s.output_dir == "~/somewhere" and s.keep_full_screenshot
           and s.light_overrides == {s.palette.lookup("red"): "#112233"}
           and not s.history_enabled and s.history_keep == 5 and s.history_dir == Path.home() / "my-history")
 

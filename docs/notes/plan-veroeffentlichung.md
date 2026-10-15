@@ -74,7 +74,7 @@ griffel/
 ## Phase 2: Abhängigkeiten zu meinem System lösen
 Gefunden beim Durchsehen des Codes, sortiert nach Wirkung auf fremde Nutzer.
 
-### 2.1 Was in gespeicherten Dateien steckt
+### 2.1 Was in gespeicherten Dateien steckt – erledigt 2026-10-15, siehe `plan-rohbild.md`
 - Strg+S, Shift+Enter und der Verlauf speichern den ganzen Rohscreenshot als Base64 im
   PNG-Text-Chunk, auch außerhalb des Ausschnitts (`save_drawing` übergibt `crop` nur als Rahmen).
   Die Unschärfe wird eingebrannt, der Ausschnitt nicht. Wer so eine Datei weitergibt, weil sie
@@ -276,5 +276,5 @@ package() {
 - Unterstützte Ziele für 0.1.0: Vorschlag „X11 + beliebiger WM, getestet mit herbstluftwm und i3“,
   KDE/GNOME auf Xorg als „sollte gehen“, damit der Bypass-Fokus das Release nicht aufhält
 - pipx/PyPI zusätzlich zum AUR? Der Name `griffel` ist auf PyPI frei
-- Gespeicherte Dateien: ganzes Rohbild behalten oder auf den Ausschnitt beschneiden, und was ist
-  der Standard (Phase 2.1)
+- ~~Gespeicherte Dateien: ganzes Rohbild behalten oder beschneiden~~ Entschieden 2026-10-15:
+  Option `[output] keep_full_screenshot`, Standard `false` (beschneiden), Verlauf behält alles

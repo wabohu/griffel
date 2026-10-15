@@ -21,7 +21,7 @@ from PySide6.QtCore import QPointF, QRectF
 from PySide6.QtGui import QCursor, QGuiApplication, QImage, QPainter
 
 from griffel.commands import AddItemCommand
-from griffel.document import build_document, elements_from_dicts, save_document
+from griffel.document import build_cropped_document, build_document, elements_from_dicts, save_document
 from griffel.elements import ImageElement, ShapeElement, blur_block, new_id, pixelate
 from griffel.export import (copy_data_to_clipboard, copy_text_to_clipboard, copy_to_clipboard, data_from_clipboard,
                     new_file_path, png_bytes, render_scene, save_png, short_path)
@@ -217,9 +217,16 @@ class OutputMixin:
         except OSError as e:
             self.report(f"Saving failed: {e}", error=True)
             return None
-        background = self.board_color if self.board else self.background_to_save()
-        crop = None if self.board else self.crop_rect
-        ok, message = save_document(path, rendered, build_document(background, self.elements(), crop))
+        if self.board:
+            document = build_document(self.board_color, self.elements())
+        elif self.crop_rect is not None and not self.settings.keep_full_screenshot:
+            # Only the crop: whoever gets the file must not find the rest of the screen in it
+            area, size = self.output_area()
+            document = build_cropped_document(self.background_to_save(), self.elements(), area,
+                                              size.width() / max(1.0, area.width()))
+        else:
+            document = build_document(self.background_to_save(), self.elements(), self.crop_rect)
+        ok, message = save_document(path, rendered, document)
         if ok:
             self.document_path = path
             self.undo_stack.setClean()  # remember the state: from here on "nothing unsaved"

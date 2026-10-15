@@ -79,6 +79,17 @@ Settings live in `~/.config/griffel/config.toml`. Every option is explained in
 [config.example.toml](config.example.toml). You don't need the file at all,
 anything missing falls back to the defaults.
 
+## Privacy
+
+- Saved drawings (Ctrl+S, Shift+Enter) carry their editing data inside the PNG,
+  including the screenshot below the markings. With a crop, only the cropped part
+  is stored, unless you set `[output] keep_full_screenshot = true`. Blurred areas
+  are burned in, so they can't be recovered from the file.
+- The history in `~/.local/share/griffel/history` keeps the whole screenshot of
+  every image you changed, by default the last 100. Turn it off or shorten it
+  under `[history]`.
+- To pass an image on, Ctrl+E exports a plain PNG without any editing data.
+
 ## Tests
 
 ```sh

@@ -171,6 +171,8 @@ class Settings:
 
         # Output: target folder for PNGs ([output] dir), ~ is allowed
         self.output_dir = get_str(config, "output", "dir") or default_output_dir()
+        # Editable files with a crop: whole raw screenshot (frame stays changeable) or only the crop
+        self.keep_full_screenshot = self.config_bool(config, "output", "keep_full_screenshot", False)
 
         # Bar at startup: off in screenshot mode, on in the whiteboard ([ui], b toggles)
         self.show_bar = self.config_bool(config, "ui", "show_bar_board", True) if board \

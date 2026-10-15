@@ -235,10 +235,17 @@ def main():
           cr.render_image().size().toTuple() == (300, 200) and not cr.cropping and cr.crop_rect is not None)
     QTest.keyClick(cr, Qt.Key_S, Qt.ControlModifier)
     saved_png = QImage(str(cr.document_path))
+    bg_cut, _, _, _, saved_crop = load_document(cr.document_path, with_crop=True)
+    check("crop: file shows the crop and contains only the crop of the screenshot, no frame",
+          saved_png.size().toTuple() == (300, 200) and bg_cut.size().toTuple() == (300, 200)
+          and saved_crop is None)
+    cr.settings.keep_full_screenshot = True  # [output] keep_full_screenshot = true
+    QTest.keyClick(cr, Qt.Key_S, Qt.ControlModifier)
     bg_full, _, _, _, saved_crop = load_document(cr.document_path, with_crop=True)
-    check("crop: file shows the crop, contains the whole screenshot and the frame",
-          saved_png.size().toTuple() == (300, 200) and bg_full.size().toTuple() == (800, 400)
+    check("crop, keep_full_screenshot: file contains the whole screenshot and the frame",
+          QImage(str(cr.document_path)).size().toTuple() == (300, 200) and bg_full.size().toTuple() == (800, 400)
           and saved_crop is not None and saved_crop.size().toTuple() == (300.0, 200.0))
+    cr.settings.keep_full_screenshot = False
     QTest.keyClick(cr, Qt.Key_X)
     QTest.keyClick(cr, Qt.Key_Escape)  # Esc during the selection: remove the crop
     removed = cr.crop_rect is None and cr.render_image().size().toTuple() == (800, 400)
@@ -322,6 +329,40 @@ def main():
           "(also with x and without selecting the crop; one undo step restores both)",
           inside_free and esc_ok and cleared and restored and cleared_in_x and cleared_unselected)
     cr.close()
+
+    # Saving with a crop: only the crop of the raw image, elements moved along, those outside
+    # left out; reopened it looks the same as the saved image
+    from griffel.commands import AddItemCommand
+    from griffel.elements import ShapeElement
+    stripes = QPixmap(800, 400)
+    stripes.fill(QColor("#808080"))
+    painter = QPainter(stripes)
+    painter.fillRect(QRectF(150, 100, 50, 300), QColor("#c04020"))  # crosses the crop
+    painter.end()
+    cc = make_canvas(stripes)
+
+    def add_rect(a, b):
+        item = ShapeElement(Tool.RECT, QPointF(*a), QColor("#7aa2f7"), 4)
+        item.points[1] = QPointF(b[0] - a[0], b[1] - a[1])
+        item.rebuild()
+        cc.undo_stack.push(AddItemCommand(cc.scene_, item))
+        return item
+    add_rect((120, 80), (220, 160))   # inside the crop
+    add_rect((350, 200), (450, 300))  # sticks out of the crop at the bottom right
+    add_rect((600, 300), (700, 380))  # completely outside
+    cc.set_crop(QRectF(100, 50, 300, 200))
+    QTest.keyClick(cc, Qt.Key_S, Qt.ControlModifier)
+    shown = QImage(str(cc.document_path)).convertToFormat(QImage.Format_ARGB32)
+    bg_cut, loaded, _, _ = load_document(cc.document_path)
+    positions = sorted((round(e.pos().x()), round(e.pos().y())) for e in loaded)
+    reopened = make_canvas(QPixmap.fromImage(bg_cut), loaded)
+    again = reopened.render_image().convertToFormat(QImage.Format_ARGB32)
+    check(f"crop saved: only the crop, elements moved, the one outside left out ({positions})",
+          bg_cut.size().toTuple() == (300, 200) and positions == [(20, 30), (250, 150)]
+          and QColor(bg_cut.pixel(60, 100)) == QColor("#c04020"))
+    check("crop saved: reopened it looks like the saved image", again == shown)
+    reopened.close()
+    cc.close()
 
     # Multi-selection: Ctrl+A, Shift+click, rubber band; color, size, move, delete
     # apply to all, one undo step each
@@ -1074,6 +1115,15 @@ def main():
     board_h.start_history()
     check("history: never in the whiteboard", board_h.history_path is None)
     board_h.close()
+    cropped_h = make_canvas(first_bg)
+    cropped_h.start_history()
+    cropped_h.set_crop(QRectF(100, 50, 300, 200))
+    draw_rect(cropped_h, 100)
+    cropped_h.flush_history()
+    h_bg, _, _, _, h_crop = load_document(cropped_h.history_path, with_crop=True)
+    check("history: entry with a crop keeps the whole screenshot and the frame",
+          h_bg.size().toTuple() == (1100, 500) and h_crop is not None and h_crop.width() == 300)
+    cropped_h.close()
 
     # Whiteboard: empty area, save, load again as whiteboard
     from griffel import export
