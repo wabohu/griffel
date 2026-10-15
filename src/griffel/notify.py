@@ -8,9 +8,11 @@ import os
 import shutil
 import subprocess
 import sys
+from importlib.resources import files
 from pathlib import Path
 
-ROFI_THEME = Path(__file__).resolve().parent / "data" / "griffel.rasi"
+# Package data: found in the source folder and in the installed package (pyproject.toml, package-data)
+ROFI_THEME = Path(str(files("griffel") / "data" / "griffel.rasi"))
 ROFI_COLORS = Path.home() / ".config" / "rofi" / "colors.rasi"
 NOT_AVAILABLE = object()  # return value of ask() when rofi is not usable
 
