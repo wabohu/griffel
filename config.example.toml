@@ -1,4 +1,4 @@
-# Example config for griffel.py
+# Example config for griffel
 # Copy to ~/.config/griffel/config.toml
 # If the file or a value is missing, the tool uses sensible defaults.
 
@@ -52,12 +52,13 @@ messages = "dunst"
 # Prompts (e.g. "Save?" when closing the whiteboard): "rofi" (rofi -dmenu,
 # choose with arrow keys or fuzzy input) or "qt" (Qt dialog). If rofi is missing: "qt".
 dialogs = "rofi"
-# Own rofi theme for the prompts; if not set, rofi/griffel.rasi in the project
+# Own rofi theme for the prompts; if not set, the one that comes with griffel
+# (src/griffel/data/griffel.rasi)
 # (additionally loads ~/.config/rofi/colors.rasi, if it exists)
 # rofi_theme = "~/.config/rofi/themes/griffel.rasi"
 
 [board]
-# Whiteboard (python griffel.py --board): background color. Name as in [colors],
+# Whiteboard (griffel --board): background color. Name as in [colors],
 # "background" (Alacritty background) or "#rrggbb"
 background = "background"
 # Backgrounds to cycle through with Ctrl+B / Ctrl+Shift+B (undo step, saved with the drawing).

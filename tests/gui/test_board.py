@@ -80,7 +80,7 @@ def main():
               hasattr(background, "name") and background.name() == PAPER
               and [e.tool.name for e in elements] == ["RECT"])
 
-        # Open again (like python griffel.py file.png): as whiteboard, light, title = file
+        # Open again (like griffel file.png): as whiteboard, light, title = file
         s.spawn([str(GRIFFEL), str(saved[0])], log="reopen")
         check("opened again", wait(lambda: board_window(s)[1], 10))
         pid, win = board_window(s)

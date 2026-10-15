@@ -25,7 +25,7 @@ def main():
         s.type("a")
         check("initial state: keys arrive in the test window", wait(lambda: sink_out.read_text() == "a"))
 
-        # Start via hotkey (sxhkd -> griffel.py)
+        # Start via hotkey (sxhkd -> run.py)
         s.key("alt+Escape")
         check("start via hotkey: griffel running", wait(lambda: s.griffel_pids(), 10))
         pid = (s.griffel_pids() or [0])[0]

@@ -24,7 +24,7 @@ Jede Phase endet lauffähig mit grünen Tests.
 - **Lizenz: entschieden, `GPL-3.0-or-later`** (2026-10-14). SPDX in README (erledigt),
   `pyproject.toml` und PKGBUILD; optional eine Zeile `# SPDX-License-Identifier: GPL-3.0-or-later` je Datei
 
-## Phase 1: Paketstruktur (Roadmap 20, flach)
+## Phase 1: Paketstruktur (Roadmap 20, flach) – erledigt 2026-10-15, siehe `plan-pakete.md`
 Voraussetzung für pipx und AUR, weil 22 flache Module sonst als Top-Level-Module
 (`ui`, `config`, `history` …) in `site-packages` landen würden – Namenskonflikte garantiert.
 Bewusst vor Phase 2: rein mechanisch, und Phase 2 braucht schon Paketdaten

@@ -51,7 +51,7 @@ Wayland doesn't work.
 ## Requirements
 
 - Linux with X11
-- Python 3 and PySide6 (Arch: `python-pyside6`)
+- Python 3.11 or newer and PySide6 (Arch: `pyside6`)
 - `xclip` for the clipboard
 - Optional: `xdotool` and `herbstclient` to give the focus back on close,
   `notify-send` with a notification daemon like dunst, and `rofi` for prompts.
@@ -61,12 +61,13 @@ Wayland doesn't work.
 
 ```sh
 git clone https://github.com/wabohu/griffel.git
-ln -s "$PWD/griffel/griffel.py" ~/.local/bin/griffel
+ln -s "$PWD/griffel/run.py" ~/.local/bin/griffel   # starts it from the source folder
 
 griffel              # annotate a screenshot of the monitor under the mouse
 griffel --board      # empty whiteboard in a normal window
 griffel --last       # open the latest screenshot from the history
 griffel image.png    # open a saved drawing or any PNG
+griffel --version
 ```
 
 Put `griffel` on a global hotkey, that's how it's meant to be used. Inside, `?`
