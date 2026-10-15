@@ -14,6 +14,8 @@ New action in keymap.DEFAULT_KEYS = a description here in DESCRIPTIONS
 """
 import re
 
+from griffel import keyboard as kb
+
 SCREENSHOT, BOARD = "screenshot", "board"
 BOTH = (SCREENSHOT, BOARD)
 
@@ -87,12 +89,6 @@ SHORT = {
     "toggle_bar": "bar", "crop": "crop",
     "color_next": "color →", "color_prev": "color ←",
 }
-# Keys of the keyboard picture: left half, column by column from the outside (top to bottom),
-# like my keyboard in Vial. The stagger of the columns is drawn by ui.HelpPanel
-KEYBOARD_COLUMNS = (("tab", "=", "`"), ("q", "a", "z"), ("w", "s", "x"),
-                    ("e", "d", "c"), ("r", "f", "v"), ("t", "g", "b"))
-KEYBOARD_KEYS = {key for column in KEYBOARD_COLUMNS for key in column}
-
 KEY_NAMES = {"Return": "Enter", "Left": "←", "Right": "→",
              "Up": "↑", "Down": "↓", "Shift+?": "?", "Meta": "Super"}
 
@@ -168,14 +164,17 @@ def sections(keymap, tools, color_count, size_count, board, omit=frozenset()):
     return [(name, entries) for name, entries in groups.items() if entries]
 
 
-# Groups that overview() shows as a picture row or its own column instead of a list on the right
-PICTURE_GROUPS = ("Tools", "Color and size", "Mouse")
+# Groups that overview() shows as a picture row or its own column instead of a list on the right.
+# Tools are not among them: tool keys outside the keyboard picture (e.g. z on QWERTZ) stay in
+# the list "Tools", the others are left out there already (omit)
+PICTURE_GROUPS = ("Color and size", "Mouse")
 
 
-def keyboard(keymap, tools, board):
-    """What the keys of the keyboard picture do in the current mode:
-    {key: {"plain" / "shift": (Tool or None, short label)}}. Tools by their slot, the other
-    actions by their keys from DESCRIPTIONS; colors, sizes and hjkl have their own places."""
+def keyboard(keymap, tools, board, picture_keys):
+    """What the keys of the keyboard picture (picture_keys, see keyboard.picture_keys) do in
+    the current mode: {key: {"plain" / "shift": (Tool or None, short label)}}. Tools by their
+    slot, the other actions by their keys from DESCRIPTIONS; colors, sizes and hjkl have their
+    own places."""
     from griffel.tools import Tool  # here, so the module stays importable without Qt
     mode = BOARD if board else SCREENSHOT
     actions = [("tool_select", Tool.SELECT), ("tool_marker", Tool.MARKER)]
@@ -189,15 +188,17 @@ def keyboard(keymap, tools, board):
         label = tool.value if tool else SHORT.get(action, DESCRIPTIONS[action][1])
         for key in map(display, keymap.labels(action)):
             layer, _, base = key.rpartition("+")
-            if base in KEYBOARD_KEYS and layer in ("", "shift"):
+            if base in picture_keys and layer in ("", "shift"):
                 keys.setdefault(base, {})["shift" if layer else "plain"] = (tool, label)
     return keys
 
 
-def overview(keymap, tools, color_count, size_count, board):
+def overview(keymap, tools, color_count, size_count, board, caps=None, rows=None):
     """Data for the panel (draft D):
     tools: [(Tool, keys)] with Select first; colors / sizes: keys per field or level;
     color_hint / size_hint: addition to the heading (common modifier, cycling, wheel);
+    caps: keys of the picture (keyboard.caps, default: normal QWERTY keyboard), rows: whole
+    keyboard rows for sorting the color fields (keyboard.FULL_ROWS);
     keyboard: see keyboard(); mouse: [(mouse, description)];
     lists: [(group, [(keys, description)])] without the keys on the keyboard picture."""
     from griffel.tools import Tool  # here, so the module stays importable without Qt
@@ -216,11 +217,13 @@ def overview(keymap, tools, color_count, size_count, board):
     color_hint = ", ".join(x for x in (f"{color_prefix} + …" if color_prefix else "",
                                        f"{browse} cycles" if browse else "") if x)
     size_hint = ", ".join(x for x in (f"{size_prefix} + …" if size_prefix else "", "alt+wheel fine") if x)
-    on_keys = keyboard(keymap, tools, board)
+    caps = caps if caps is not None else kb.caps("row", "qwerty")
+    on_keys = keyboard(keymap, tools, board, kb.picture_keys(caps))
     omit = {key if layer == "plain" else f"shift+{key}" for key, layers in on_keys.items() for layer in layers}
     groups = sections(keymap, tools, color_count, size_count, board, omit)
     return {
         "keyboard": on_keys,
+        "caps": caps, "rows": rows if rows is not None else kb.FULL_ROWS["qwerty"],
         "tools": tool_keys,
         "colors": colors, "color_hint": color_hint,
         "sizes": sizes, "size_hint": size_hint,

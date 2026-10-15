@@ -89,7 +89,7 @@ Gefunden beim Durchsehen des Codes, sortiert nach Wirkung auf fremde Nutzer.
   (sauberes PNG ohne Bearbeitungsdaten)“, dazu Verlauf und `[history] keep`
 - Test: `tests/test_document.py`, gespeichertes Rohbild hat bei `false` die Größe des Ausschnitts
 
-### 2.2 Tastaturbild in der Übersicht (?) – Kyria/Vial
+### 2.2 Tastaturbild in der Übersicht (?) – Kyria/Vial – erledigt 2026-10-15, siehe `plan-tastaturbild.md`
 - `ui.KEYBOARD_STAGGER = (0.78, 0.78, 0.26, 0.0, 0.26, 0.38)` ist der Spaltenversatz meiner
   Kyria, `shortcuts.KEYBOARD_COLUMNS` legt `tab`, `=`, `` ` `` in die äußere Spalte (Kyria-Belegung)
 - Neu: `[help] keyboard = "row" | "column" | "ortho"`

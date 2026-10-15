@@ -8,7 +8,6 @@ from PySide6.QtCore import QPointF, QRectF, QSize, QSizeF, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QFont, QFontDatabase, QFontMetricsF, QPainter, QPen
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QWidget
 
-from griffel.shortcuts import KEYBOARD_COLUMNS
 from griffel.tools import tool_icon
 
 
@@ -326,27 +325,20 @@ class Toast(QLabel):
         self.timer.start(self.DURATION_MS)
 
 
-# Keyboard picture of the overview: column stagger of shortcuts.KEYBOARD_COLUMNS in key heights
-# (how far each column sits lower than the highest one, the E column), like my keyboard in Vial
-KEYBOARD_STAGGER = (0.78, 0.78, 0.26, 0.0, 0.26, 0.38)
-# Letter rows, for the color fields (one row per keyboard row of their keys)
-KEY_ROWS = ("1234567890", "qwertyuiop", "asdfghjkl;", "zxcvbnm,./")
-
-
-def key_row(keys):
+def key_row(keys, key_rows):
     """Keyboard row of the first key in keys (e.g. "w", "shift+a, x"); None outside the four
-    letter/number rows (F1, Space ...)."""
+    letter/number rows key_rows (keyboard.FULL_ROWS; F1, Space ...)."""
     base = keys.split(",")[0].strip().lower().rsplit("+", 1)[-1]
-    return next((row for row, letters in enumerate(KEY_ROWS) if len(base) == 1 and base in letters), None)
+    return next((row for row, letters in enumerate(key_rows) if len(base) == 1 and base in letters), None)
 
 
-def keyboard_rows(key_list, wrap=10):
+def keyboard_rows(key_list, key_rows, wrap=10):
     """Indexes of key_list grouped by keyboard row of their key (rows in keyboard order, each
     in list order); entries without such a key at the end, wrap per row."""
     rows = {}
     rest = []
     for i, keys in enumerate(key_list):
-        row = key_row(keys) if keys else None
+        row = key_row(keys, key_rows) if keys else None
         if row is None:
             rest.append(i)
         else:
@@ -355,8 +347,8 @@ def keyboard_rows(key_list, wrap=10):
 
 
 class HelpPanel(QWidget):
-    """Key overview (?), draft D: top left the left half of the keyboard (column stagger as
-    on my keyboard) with tools and single keys, below it color fields (one row per keyboard
+    """Key overview (?), draft D: top left the left half of the keyboard (shape and layout
+    from [help], keyboard.py) with tools and single keys, below it color fields (one row per keyboard
     row of their keys) and next to them size dots, each with its key; the pictures spread
     over the full height. The lists (mouse first, then the groups) flow in reading order over three
     columns: one below the pictures, two to their right from the top, split so the columns
@@ -446,26 +438,26 @@ class HelpPanel(QWidget):
         x, y = m, top
         section_gap = (self.SECTION_GAP * s + self.spread)  # spread: fill the height (set_content)
         heading(x, y, "Keys")
-        # Left half of the keyboard with its column stagger (KEYBOARD_STAGGER): on each key
+        # Left half of the keyboard (keyboard.caps: positions in key units): on each key
         # the tool icon or a short word, below it what the key does with Shift
         cap_w, cap_h, cap_gap = self.KEY_CAP[0] * s, self.KEY_CAP[1] * s, 6 * s
+        pitch_x, pitch_y = cap_w + cap_gap, cap_h + cap_gap
         label_f = self.make_font(13)
         keys_top = y + 14 * s
-        for column, (caps, stagger) in enumerate(zip(KEYBOARD_COLUMNS, KEYBOARD_STAGGER)):
-            for row, cap in enumerate(caps):
-                r = QRectF(x + column * (cap_w + cap_gap), keys_top + (stagger + row) * (cap_h + cap_gap),
-                           cap_w, cap_h)
-                if p:
-                    self.paint_key(p, r, cap, d["keyboard"].get(cap, {}), key_f, label_f, small_f)
-        left_w = len(KEYBOARD_COLUMNS) * (cap_w + cap_gap) - cap_gap
-        y = keys_top + (max(KEYBOARD_STAGGER) + 3) * (cap_h + cap_gap) - cap_gap + 10 * s + section_gap
+        for cap in d["caps"]:
+            r = QRectF(x + cap.x * pitch_x, keys_top + cap.y * pitch_y, cap.width * pitch_x - cap_gap, cap_h)
+            if p:
+                self.paint_key(p, r, cap.key, d["keyboard"].get(cap.key, {}), key_f, label_f, small_f)
+        left_w = max(cap.x + cap.width for cap in d["caps"]) * pitch_x - cap_gap
+        keys_h = max(cap.y + 1 for cap in d["caps"]) * pitch_y - cap_gap
+        y = keys_top + keys_h + 10 * s + section_gap
 
         heading(x, y, "Colors", d["color_hint"])
         # One row per keyboard row of the keys (a s d f g / z x c v b), fields without a key
         # (only reachable by cycling) in rows of their own at the end
         sw, gap = self.SWATCH * s, 10 * s
         color_keys = [d["colors"][i] if i < len(d["colors"]) else "" for i in range(len(self.colors))]
-        color_rows = keyboard_rows(color_keys)
+        color_rows = keyboard_rows(color_keys, d["rows"])
         row_h = sw + 24 * s + 10 * s  # field, key below it, gap to the next row
         for row, indexes in enumerate(color_rows):
             for col, i in enumerate(indexes):

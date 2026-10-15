@@ -79,6 +79,10 @@ Settings live in `~/.config/griffel/config.toml`. Every option is explained in
 [config.example.toml](config.example.toml). You don't need the file at all,
 anything missing falls back to the defaults.
 
+The default keys are laid out for QWERTY. On QWERTZ you may want to swap `z`
+and `y` under `[keys]`. The keyboard picture in the overview (`?`) follows your
+layout and can show a split or ortho keyboard instead (`[help]`).
+
 ## Privacy
 
 - Saved drawings (Ctrl+S, Shift+Enter) carry their editing data inside the PNG,

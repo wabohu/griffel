@@ -222,6 +222,54 @@ def main():
           and 'yellow = "#000000"' in text and '# yellow' not in text)
     check("sync_config: second run changes nothing", sync_config.merge(template, text)[0] == text)
 
+    # Keyboard picture of the overview ([help], keyboard.py)
+    from griffel import keyboard as kb
+    check("[help] default: normal keyboard, layout from setxkbmap, default stagger and outer column",
+          plain.help_keyboard == "row" and plain.help_layout == "auto" and plain.help_stagger == kb.DEFAULT_STAGGER
+          and plain.help_outer == kb.DEFAULT_OUTER and plain.picture_layout() in kb.LAYOUTS)
+    kyria = st.Settings({"help": {"keyboard": "column", "layout": "qwertz", "stagger": [1, 1, 0.5, 0, 0.5, 0.5],
+                                  "outer_column": ["Tab", "=", "`"]}}, False)
+    check("[help] own values taken over", kyria.help_keyboard == "column" and kyria.picture_layout() == "qwertz"
+          and kyria.help_stagger == (1.0, 1.0, 0.5, 0.0, 0.5, 0.5) and kyria.help_outer == ("tab", "=", "`"))
+    bad_help, hints = quiet(st.Settings, {"help": {"keyboard": "split", "layout": "dvorak", "stagger": [1, 2],
+                                                   "outer_column": "tab"}}, False)
+    check("[help] broken values: defaults with hints",
+          bad_help.help_keyboard == "row" and bad_help.help_layout == "auto"
+          and bad_help.help_stagger == kb.DEFAULT_STAGGER and bad_help.help_outer == kb.DEFAULT_OUTER
+          and all(word in hints for word in ("keyboard", "layout", "stagger", "outer_column")))
+    layouts = [kb.parse_layout(q) for q in ("rules: evdev\nmodel: pc105\nlayout: us\nvariant: altgr-intl\n",
+                                            "layout:     de\n", "layout: fr\n", "layout: us,de\n", "layout: ch\n",
+                                            "", None)]
+    check(f"layout from setxkbmap: us, de, fr, first of several, ch, nothing ({layouts})",
+          layouts == ["qwerty", "qwertz", "azerty", "qwerty", "qwertz", "qwerty", "qwerty"])
+    row = kb.caps("row", "qwerty")
+    check("picture row: wide tab/caps/shift outside, letters offset by row (0, 0.25, 0.75)",
+          [(c.key, c.width) for c in row[:3]] == [("tab", 1.5), ("caps", 1.75), ("shift", 2.25)]
+          and [(c.key, c.x) for c in row if c.key in "qaz"] == [("q", 1.5), ("a", 1.75), ("z", 2.25)]
+          and kb.picture_keys(row) == set("qwertasdfgzxcvb") | {"tab"})
+    column = kb.caps("column", "qwerty", outer=("tab", "=", "`"))
+    check("picture column: stagger per column, own outer column",
+          [(c.key, c.y) for c in column if c.key in ("tab", "w", "e", "d")]
+          == [("tab", 0.78), ("w", 0.26), ("e", 0.0), ("d", 1.0)] and "=" in kb.picture_keys(column))
+    ortho = kb.caps("ortho", "azerty")
+    check("picture ortho azerty: no offset, a top left, w bottom left",
+          {c.y for c in ortho} == {0.0, 1.0, 2.0} and next(c for c in ortho if c.key == "a").y == 0.0
+          and next(c for c in ortho if c.key == "w").y == 2.0)
+    for kind in kb.KINDS:
+        for layout in kb.LAYOUTS:
+            caps = kb.caps(kind, layout)
+            data = shortcuts.overview(keymap, [Tool.RECT, Tool.TEXT], 9, 4, False, caps, kb.FULL_ROWS[layout])
+            on_picture = {key if layer == "plain" else f"shift+{key}"
+                          for key, layers in data["keyboard"].items() for layer in layers}
+            listed = {part.strip() for _, entries in data["lists"] for keys, _ in entries for part in keys.split(",")}
+            lost = [k for a in ("tool_blur", "crop", "spotlight", "undo", "tool_select")
+                    for k in map(shortcuts.display, keymap.labels(a)) if k not in on_picture | listed]
+            check(f"overview {kind}/{layout}: every key on the picture or in the lists {lost or ''}", not lost)
+    qwertz = shortcuts.overview(keymap, [Tool.RECT], 9, 4, False, kb.caps("row", "qwertz"))
+    check("overview qwertz: z (blur) not on the keyboard picture, so in the list Tools",
+          "z" not in qwertz["keyboard"] and ("z", "Blur") in dict(qwertz["lists"]).get("Tools", [])
+          and "y" not in qwertz["keyboard"] and "z" in shortcuts.overview(keymap, [Tool.RECT], 9, 4, False)["keyboard"])
+
     print("\nAll OK." if not failures else f"\n{len(failures)} failed.")
     return 1 if failures else 0
 

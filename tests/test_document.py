@@ -1258,6 +1258,24 @@ def main():
           selected and typed.font_kind == "mono")
     fc.close()
 
+    # Key overview: one photo per keyboard picture ([help]) in tests/gui/out/help-keyboard/
+    # (look at them: shape and layout are a matter of taste, no test checks that)
+    out = Path(__file__).resolve().parent / "gui" / "out" / "help-keyboard"
+    out.mkdir(parents=True, exist_ok=True)
+    hp = make_canvas(QPixmap(1920, 1080))
+    hp.resize(1920, 1080)
+    sizes = {}
+    for kind, layout in (("row", "qwerty"), ("row", "qwertz"), ("column", "qwerty"), ("ortho", "azerty")):
+        hp.settings.help_keyboard, hp.settings.help_layout = kind, layout
+        hp.show_help()
+        QApplication.processEvents()
+        sizes[kind, layout] = hp.help_panel.size().toTuple()
+        hp.help_panel.grab().save(str(out / f"{kind}-{layout}.png"))
+        hp.help_panel.hide()
+    check(f"overview: every keyboard picture fits into the window ({sizes})",
+          all(0 < w <= 1920 and 0 < h <= 1080 for w, h in sizes.values()))
+    hp.close()
+
     print("\nAll OK." if not failures else f"\n{len(failures)} failed.")
     return 1 if failures else 0
 

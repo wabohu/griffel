@@ -15,6 +15,7 @@ from griffel.colors import load_palette, load_terminal_font
 from griffel.config import get_float, get_int, get_int_list, get_list, get_str
 from griffel.export import default_output_dir
 from griffel.history import default_history_dir
+from griffel.keyboard import DEFAULT_OUTER, DEFAULT_STAGGER, KINDS, LAYOUTS, detect_layout
 from griffel.keymap import KeyMap
 from griffel.tools import RECT_RADIUS, Tool, parse_tool, tool_order
 from griffel.ui import Theme
@@ -190,6 +191,53 @@ class Settings:
         self.history_enabled = self.config_bool(config, "history", "enabled", True)
         self.history_dir = Path(get_str(config, "history", "dir") or default_history_dir()).expanduser()
         self.history_keep = self.config_keep(config)
+
+        # Keyboard picture of the overview from [help] (keyboard.py). Layout "auto" is only
+        # resolved when the overview opens (picture_layout): no setxkbmap call at startup
+        self.help_keyboard = self.config_word(config, "help", "keyboard", KINDS)
+        self.help_layout = self.config_word(config, "help", "layout", ("auto",) + tuple(LAYOUTS))
+        self.help_stagger = self.config_stagger(config)
+        self.help_outer = self.config_outer(config)
+
+    def picture_layout(self):
+        """Layout of the keyboard picture: [help] layout, with "auto" from setxkbmap."""
+        return detect_layout() if self.help_layout == "auto" else self.help_layout
+
+    def config_word(self, config, section, key, choices):
+        """config[section][key] must be one of choices; missing -> the first, unknown -> a hint, the first."""
+        table = config.get(section)
+        value = table.get(key, choices[0]) if isinstance(table, dict) else choices[0]
+        if value not in choices:
+            print(f"[{section}] {key}={value!r} unknown, allowed: {', '.join(choices)}; using {choices[0]!r}",
+                  file=sys.stderr)
+            return choices[0]
+        return value
+
+    def config_stagger(self, config):
+        """[help] stagger: 6 numbers 0-3 (key heights per column); otherwise the default."""
+        table = config.get("help")
+        value = table.get("stagger") if isinstance(table, dict) else None
+        if value is None:
+            return DEFAULT_STAGGER
+        ok = isinstance(value, list) and len(value) == len(DEFAULT_STAGGER) and all(
+            isinstance(v, (int, float)) and not isinstance(v, bool) and 0 <= v <= 3 for v in value)
+        if not ok:
+            print(f"[help] stagger={value!r} needs {len(DEFAULT_STAGGER)} numbers 0-3, using the default",
+                  file=sys.stderr)
+            return DEFAULT_STAGGER
+        return tuple(float(v) for v in value)
+
+    def config_outer(self, config):
+        """[help] outer_column: 3 key names ("" = empty key); otherwise the default."""
+        table = config.get("help")
+        value = table.get("outer_column") if isinstance(table, dict) else None
+        if value is None:
+            return DEFAULT_OUTER
+        if not (isinstance(value, list) and len(value) == len(DEFAULT_OUTER) and all(isinstance(v, str) for v in value)):
+            print(f"[help] outer_column={value!r} needs {len(DEFAULT_OUTER)} key names, using the default",
+                  file=sys.stderr)
+            return DEFAULT_OUTER
+        return tuple(v.strip().lower() for v in value)
 
     def config_choice(self, config, key, choices):
         """[ui] key must be one of choices; True = the first (external) variant."""

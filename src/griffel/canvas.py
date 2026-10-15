@@ -17,6 +17,7 @@ from griffel.canvas_history import HistoryMixin
 from griffel.canvas_input import InputMixin
 from griffel.canvas_output import OutputMixin
 from griffel.canvas_pointer import PointerMixin
+from griffel import keyboard
 from griffel.commands import property_command
 from griffel.config import load_config
 from griffel.connectors import update_all
@@ -483,7 +484,11 @@ class Canvas(InputMixin, BoardMixin, OutputMixin, HistoryMixin, PointerMixin, Cr
 
     def show_help(self):
         """?: overview of the keyboard shortcuts as they are currently bound."""
-        data = overview(self.settings.keymap, self.settings.tools, len(self.settings.colors), SIZE_LEVELS, self.board)
+        st = self.settings
+        layout = st.picture_layout()
+        caps = keyboard.caps(st.help_keyboard, layout, st.help_stagger, st.help_outer)
+        data = overview(st.keymap, st.tools, len(st.colors), SIZE_LEVELS, self.board,
+                        caps, keyboard.FULL_ROWS[layout])
         self.help_panel.set_content(data, self.palette_bar.colors)  # colors as in the bar
         self.help_panel.show_centered()
 

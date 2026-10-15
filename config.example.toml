@@ -114,11 +114,30 @@ enabled = true
 dir = "~/.local/share/griffel/history"
 keep = 100          # this many entries stay, older ones get deleted when a new one is created (1-100000)
 
+[help]
+# Keyboard picture in the key overview (?): the left half of your keyboard with what each
+# key does. Only the picture changes, the keys themselves stay as they are.
+#   "row"    = normal keyboard, rows offset, tab / caps / shift on the outside
+#   "column" = column stagger like split keyboards (Corne, Kyria), see stagger
+#   "ortho"  = plain grid without offset (Planck, Preonic)
+keyboard = "row"
+# Letters in the picture: "auto" (from setxkbmap -query), "qwerty", "qwertz", "azerty".
+# On qwertz the z sits right of t, outside the picture; its tool is then listed under Tools.
+layout = "auto"
+# Only for "column": how far each of the 6 columns (outer one first) sits lower than the
+# highest one, in key heights (0-3). Example for a Kyria:
+# stagger = [0.78, 0.78, 0.26, 0.0, 0.26, 0.38]
+# Only for "column" and "ortho": the 3 keys of the outer column, top to bottom ("" = empty key).
+# Default ["tab", "", ""]. Example:
+# outer_column = ["tab", "=", "`"]
+
 [keys]
 # Action = key. Only add what should differ from the default; all default values are listed here.
 # Spelling as in Qt menus: "r", "shift+r", "ctrl+z", "alt+a", "tab", "f1".
 # Several keys for one action as a list: ["delete", "backspace"].
 # "" = action without a key. Esc is fixed (end text input or quit the tool).
+# The defaults are laid out for QWERTY; on QWERTZ you may want to swap z and y here.
+# A dead key (e.g. ` on many international layouts) may only arrive with the next key press.
 # Bound twice: what is written here wins; the other action loses its key (warning in the terminal).
 tool_select = "w"            # select tool (always first in the bar)
 delete = ["delete", "backspace"]   # delete the selection; list = several keys
