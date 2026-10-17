@@ -39,7 +39,7 @@ def ask_rofi(s, text):
 
 def main():
     with Session("board") as s:
-        # Start via hotkey, normal window managed by herbstluftwm
+        # Start via hotkey, normal window managed by the window manager
         s.key("alt+Delete")
         check("start via hotkey: whiteboard window there", wait(lambda: board_window(s)[1], 10))
         pid, win = board_window(s)

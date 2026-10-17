@@ -53,8 +53,9 @@ Wayland doesn't work.
 - Linux with X11
 - Python 3.11 or newer and PySide6 (Arch: `pyside6`)
 - `xclip` for the clipboard
-- Optional: `xdotool` and `herbstclient` to give the focus back on close,
-  `notify-send` with a notification daemon like dunst, and `rofi` for prompts.
+- `xdotool` (or `wmctrl`) to give the keyboard focus back when the screenshot overlay
+  closes. Only with herbstluftwm it works without them (via `herbstclient`)
+- Optional: `notify-send` with a notification daemon like dunst, and `rofi` for prompts.
   Without them griffel falls back to its own Qt dialogs.
 
 ## Getting started
@@ -100,7 +101,7 @@ layout and can show a split or ortho keyboard instead (`[help]`).
 python tests/test_settings.py
 python tests/test_document.py
 python tests/regress.py
-python tests/gui/run.py      # needs Xvfb, herbstluftwm, sxhkd, xdotool
+python tests/gui/run.py      # needs Xvfb, herbstluftwm, sxhkd, xdotool (optional: i3)
 ```
 
 ## License

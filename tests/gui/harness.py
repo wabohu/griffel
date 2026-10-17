@@ -1,5 +1,9 @@
 """Harness for GUI tests: a separate invisible X server with herbstluftwm and sxhkd.
 
+The window manager can be switched to i3 (Session(wm="i3") or GRIFFEL_TEST_WM=i3 for a whole
+scenario, screenshots then in tests/gui/out/<name>-i3/), to check the focus handling
+under a second window manager (EWMH instead of herbstclient).
+
 Your real session stays untouched: everything runs on a separate display (Xvfb),
 with a separate HOME (config, history, output folder in a temp folder) and without
 a connection to the session D-Bus (no notifications on your desktop).
@@ -39,8 +43,19 @@ super + k
   touch {tmp}/hotkey-fired
 
 super + j
-  herbstclient jumpto $(xdotool search --name '^keysink$' | head -1)
+  {jump} $(xdotool search --name '^keysink$' | head -1)
 """
+
+# "super+j" in the test: put the WM focus on the test window, the way the WM does it itself
+JUMP = {"herbstluftwm": "herbstclient jumpto", "i3": "xdotool windowactivate"}
+
+# Minimal i3: no bar, no own key bindings, focus follows the mouse like in herbstluftwm
+I3_CONFIG = """\
+# i3 config file (v4)
+font pango:monospace 8
+focus_follows_mouse yes
+"""
+WMS = tuple(JUMP)
 
 GRIFFEL_CONFIG = """\
 [ui]
@@ -87,11 +102,14 @@ def _free_display():
 
 
 class Session:
-    def __init__(self, name, size="1920x1080"):
-        self.name = name
+    def __init__(self, name, size="1920x1080", wm=None):
+        self.wm = wm or os.environ.get("GRIFFEL_TEST_WM") or "herbstluftwm"
+        if self.wm not in WMS:
+            raise ValueError(f"unknown window manager {self.wm!r}, allowed: {', '.join(WMS)}")
+        self.name = name if self.wm == "herbstluftwm" else f"{name}-{self.wm}"
         self.size = size
         self.tmp = Path(tempfile.mkdtemp(prefix="griffel-gui-"))
-        self.out = OUT / name
+        self.out = OUT / self.name
         self.procs = []
         self.display = _free_display()
 
@@ -115,10 +133,7 @@ class Session:
         (home / ".config" / "griffel").mkdir(parents=True)
         (home / ".config" / "griffel" / "config.toml").write_text(GRIFFEL_CONFIG.format(tmp=self.tmp))
         sxhkdrc = self.tmp / "sxhkdrc"
-        sxhkdrc.write_text(SXHKDRC.format(griffel=GRIFFEL, tmp=self.tmp))
-        autostart = self.tmp / "hlwm-autostart"
-        autostart.write_text("#!/bin/sh\nherbstclient set focus_follows_mouse true\n")
-        autostart.chmod(0o755)
+        sxhkdrc.write_text(SXHKDRC.format(griffel=GRIFFEL, tmp=self.tmp, jump=JUMP[self.wm]))
 
         env = {k: v for k, v in os.environ.items()
                if k not in ("QT_QPA_PLATFORM", "WAYLAND_DISPLAY", "DBUS_SESSION_BUS_ADDRESS", "XAUTHORITY")}
@@ -129,11 +144,24 @@ class Session:
         self.spawn(["Xvfb", self.display, "-screen", "0", f"{self.size}x24", "-nolisten", "tcp"])
         if not wait(lambda: self.run(["xdotool", "getdisplaygeometry"]).returncode == 0, 10):
             raise RuntimeError("Xvfb does not start")
+        self.start_wm()
+        self.spawn(["sxhkd", "-c", str(sxhkdrc)], log="sxhkd")  # including the output of griffel
+        time.sleep(0.5)  # sxhkd does not report when it is ready
+
+    def start_wm(self):
+        if self.wm == "i3":
+            config = self.tmp / "i3-config"
+            config.write_text(I3_CONFIG)
+            self.spawn(["i3", "-c", str(config)], log="i3")
+            if not wait(lambda: self.run(["i3-msg", "-t", "get_version"]).returncode == 0, 10):
+                raise RuntimeError("i3 does not start")
+            return
+        autostart = self.tmp / "hlwm-autostart"
+        autostart.write_text("#!/bin/sh\nherbstclient set focus_follows_mouse true\n")
+        autostart.chmod(0o755)
         self.spawn(["herbstluftwm", "--autostart", str(autostart)])
         if not wait(lambda: self.run(["herbstclient", "get", "focus_follows_mouse"]).stdout.strip() == "true", 10):
             raise RuntimeError("herbstluftwm does not start")
-        self.spawn(["sxhkd", "-c", str(sxhkdrc)], log="sxhkd")  # including the output of griffel
-        time.sleep(0.5)  # sxhkd does not report when it is ready
 
     def stop(self):
         for pid in self.griffel_pids():

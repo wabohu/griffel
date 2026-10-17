@@ -181,6 +181,12 @@ def main():
           and themed.palette.lookup("background") == "#202020"
           and themed.theme.background.name() == "#202020")
 
+    # Focus after the overlay: [wm] focus
+    bad_focus, hints = quiet(st.Settings, {"wm": {"focus": "sway"}}, False)
+    check("[wm] focus: valid taken over, missing = auto, unknown -> hint, auto",
+          st.Settings({"wm": {"focus": "ewmh"}}, False).focus_method == "ewmh"
+          and s.focus_method == "auto" and bad_focus.focus_method == "auto" and "[wm]" in hints)
+
     own_font = st.Settings({"text": {"mono_font": "My Mono"}}, False)
     check("monospace: [text] mono_font, empty = terminal font (none in the test: system font)",
           own_font.mono_family == "My Mono" and st.Settings({"text": {"mono_font": ""}}, False).mono_family is None

@@ -19,6 +19,7 @@ from griffel.keyboard import DEFAULT_OUTER, DEFAULT_STAGGER, KINDS, LAYOUTS, det
 from griffel.keymap import KeyMap
 from griffel.tools import RECT_RADIUS, Tool, parse_tool, tool_order
 from griffel.ui import Theme
+from griffel.wm import METHODS as FOCUS_METHODS
 
 # Fallbacks if your own config is missing or contains unusable values
 DEFAULT_TOOL = Tool.FREEHAND
@@ -161,6 +162,13 @@ class Settings:
         self.use_dunst = self.config_choice(config, "messages", ("dunst", "toast"))
         self.use_rofi = self.config_choice(config, "dialogs", ("rofi", "qt"))
         self.rofi_theme = get_str(config, "ui", "rofi_theme")  # None = data/griffel.rasi in the package
+
+        # Giving the focus back after the screenshot overlay ([wm] focus, see wm.py)
+        self.focus_method = get_str(config, "wm", "focus") or "auto"
+        if self.focus_method not in FOCUS_METHODS:
+            print(f"[wm] focus={self.focus_method!r} unknown, allowed: {', '.join(FOCUS_METHODS)}; using 'auto'",
+                  file=sys.stderr)
+            self.focus_method = "auto"
 
         # Corner radius of new rectangles from [rect], separate value in the whiteboard
         self.rect_radius = self.config_radius(config, "radius_board", DEFAULT_RECT_RADIUS_BOARD) \

@@ -144,6 +144,13 @@ layout = "auto"
 # Default ["tab", "", ""]. Example:
 # outer_column = ["tab", "=", "`"]
 
+[wm]
+# Give the keyboard focus back after the screenshot overlay (it bypasses the window manager,
+# so the window manager does not do it): "auto" = via herbstclient if herbstluftwm is running,
+# otherwise the window manager's active window (EWMH, works with most window managers on X11,
+# needs xdotool or wmctrl); "herbstluftwm" or "ewmh" to force one; "off" = do nothing.
+focus = "auto"
+
 [keys]
 # Action = key. Only add what should differ from the default; all default values are listed here.
 # Spelling as in Qt menus: "r", "shift+r", "ctrl+z", "alt+a", "tab", "f1".

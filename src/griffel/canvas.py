@@ -26,7 +26,7 @@ from griffel.settings import BOARD_EXTENT, HIT_TOLERANCE, ROTATE_STEP, SIZE_LEVE
 from griffel.tools import Tool, tool_icon
 from griffel.shortcuts import overview
 from griffel.ui import HelpPanel, MainBar, PaletteBar, SizeBar, Toast, ToolBar, ui_scale
-from griffel.wm import restore_focus
+from griffel.wm import force_focus, restore_focus
 
 # All element kinds (selection, saving, stacking order …)
 ELEMENT_CLASSES = (ShapeElement, TextElement, ImageElement)
@@ -390,7 +390,7 @@ class Canvas(InputMixin, BoardMixin, OutputMixin, HistoryMixin, PointerMixin, Cr
         No keyboard grab any more: it would have caught all keys, including the global
         hotkeys of sxhkd. Instead normal focus via activateWindow() (for a window that
         bypasses the WM, Qt sets the X focus directly). closeEvent gives the focus back
-        to herbstluftwm via wm.restore_focus().
+        to the window manager's focused window via wm.restore_focus().
         """
         self.show()
         self.take_focus()
@@ -503,9 +503,18 @@ class Canvas(InputMixin, BoardMixin, OutputMixin, HistoryMixin, PointerMixin, Cr
     def hovered(self):
         return self.isVisible() and self.frameGeometry().contains(QCursor.pos())
 
+    def should_refocus(self):
+        return not self.board and not self.asking and not self.isActiveWindow() and self.hovered()
+
     def refocus_if_hovered(self):
-        if not self.board and not self.asking and not self.isActiveWindow() and self.hovered():
+        if self.should_refocus():
             self.take_focus()
+            # Qt's request can be too old for the X server (see wm.force_focus): check again
+            QTimer.singleShot(FOCUS_RETRY_MS, self.force_focus_if_hovered)
+
+    def force_focus_if_hovered(self):
+        if self.should_refocus():
+            force_focus(int(self.winId()))
 
     def changeEvent(self, event):
         # Qt concept: changeEvent reports state changes of the window, here "active/inactive".
@@ -538,7 +547,7 @@ class Canvas(InputMixin, BoardMixin, OutputMixin, HistoryMixin, PointerMixin, Cr
             self.hide()  # disappear first, then save: feels faster
             self.flush_history()
         if not self.board:
-            restore_focus()  # focus to the window herbstluftwm has focused
+            restore_focus(self.settings.focus_method)  # focus to the window the WM has focused
         # On teardown Qt deletes the scene before the undo stack; the stack still reports
         # changes then. Without disconnecting, update_bars() would run on a deleted scene
         self.undo_stack.indexChanged.disconnect(self.on_undo_index_changed)

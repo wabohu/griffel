@@ -118,7 +118,7 @@ Gefunden beim Durchsehen des Codes, sortiert nach Wirkung auf fremde Nutzer.
 - Doku: „Colors come from your Alacritty config, if you have one“ statt „from your Alacritty config“
 - Default-Schrift für Monospace ohne Alacritty: `QFontDatabase.FixedFont` (gibt es schon, prüfen)
 
-### 2.4 Fokus zurückgeben (wm.py) – herbstluftwm
+### 2.4 Fokus zurückgeben (wm.py) – herbstluftwm – erledigt 2026-10-17, siehe `plan-fokus.md`
 - Heute nur mit `herbstclient`, sonst passiert nichts. Unter i3, bspwm, awesome, Openbox,
   Xfce, KDE/GNOME auf Xorg bleibt das Problem „kein Fenster hat den Fokus“ evtl. bestehen
 - Neu, allgemein: beim Start das aktive Fenster merken (`_NET_ACTIVE_WINDOW` per
