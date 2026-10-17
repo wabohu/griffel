@@ -15,7 +15,7 @@ class Theme:
     """Interface colors: background of the bar and foreground (icons, frames, text).
 
     Default is a neutral dark gray with white; normally the settings set
-    the colors from the Alacritty scheme ([ui] in the config).
+    the colors from the palette ([ui] in the config).
     """
 
     def __init__(self, background=QColor(20, 20, 20), foreground=QColor("white"), opacity=0.75,

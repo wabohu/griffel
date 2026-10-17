@@ -1,8 +1,11 @@
-"""Read the color palette (and the font, load_terminal_font) from the Alacritty configuration.
+"""Color palette: built-in defaults, the Alacritty configuration if there is one
+([colors] source), and own values from [palette] on top. Also the terminal font
+(load_terminal_font) from the Alacritty configuration.
 
-Deliberately without Qt, so the module can be tested directly in the console:
+Deliberately without Qt, so the module can be tested directly in the console
+(shows the palette with the own config):
 
-    python colors.py
+    PYTHONPATH=src python -m griffel.colors [alacritty.toml]
 
 Everything that can go wrong (missing file, broken TOML, wrong values)
 leads to a fallback to the default palette, never to an exception.
@@ -28,6 +31,9 @@ DEFAULT_BRIGHT = {
 }
 DEFAULT_FOREGROUND = "#d8d8d8"
 DEFAULT_BACKGROUND = "#1d1f21"
+
+# Where the color values come from ([colors] source); [palette] wins in every case
+SOURCES = ("auto", "alacritty", "builtin")
 
 # Alacritty allows nested imports, but also limits the depth
 MAX_IMPORT_DEPTH = 5
@@ -240,23 +246,64 @@ def _load_file(path, target, depth, seen):
     _merge_font(target, data)
 
 
-def load_palette(config_path=None):
-    """Palette from the Alacritty config; missing values come from the defaults."""
+def palette_overrides(values):
+    """[palette] from the own config -> {name: "#rrggbb"} with names like "red",
+    "bright_red", "foreground", "background". Unknown names or values: hint, skipped."""
+    if not isinstance(values, dict):
+        return {}
+    known = {*COLOR_NAMES, *(f"bright_{n}" for n in COLOR_NAMES), "foreground", "background"}
+    result = {}
+    for name, value in values.items():
+        key = name.strip().lower().replace(" ", "_").replace("-", "_")
+        color = normalize_color(value)
+        if key not in known:
+            print(f"[palette] Unknown color name {name!r}, skipped", file=sys.stderr)
+        elif color is None:
+            print(f"[palette] {name} = {value!r}: not a color (#rrggbb), skipped", file=sys.stderr)
+        else:
+            result[key] = color
+    return result
+
+
+def _load_alacritty(palette, config_path):
+    """Alacritty colors into palette; False if there is no config."""
+    path = Path(config_path) if config_path else find_config()
+    if path is None or not path.is_file():
+        return False
+    target = {"normal": {}, "bright": {}}
+    _load_file(path, target, depth=0, seen=set())
+    palette.normal.update(target["normal"])
+    palette.bright.update(target["bright"])
+    palette.foreground = target.get("foreground", palette.foreground)
+    palette.background = target.get("background", palette.background)
+    palette.source = str(path)
+    return True
+
+
+def load_palette(config_path=None, source="auto", overrides=None):
+    """Palette: built-in values, Alacritty on top (source "auto"/"alacritty"), then
+    overrides (from palette_overrides) on top. Missing values come from the defaults."""
     palette = Palette()
     try:
-        path = Path(config_path) if config_path else find_config()
-        if path is None or not path.is_file():
-            return palette
-        target = {"normal": {}, "bright": {}}
-        _load_file(path, target, depth=0, seen=set())
-        palette.normal.update(target["normal"])
-        palette.bright.update(target["bright"])
-        palette.foreground = target.get("foreground", palette.foreground)
-        palette.background = target.get("background", palette.background)
-        palette.source = str(path)
+        if source not in SOURCES:
+            print(f"[colors] source={source!r} unknown, allowed: {', '.join(SOURCES)}; using 'auto'",
+                  file=sys.stderr)
+            source = "auto"
+        if source != "builtin" and not _load_alacritty(palette, config_path) and source == "alacritty":
+            print("[colors] source='alacritty', but no Alacritty config found; using the default palette",
+                  file=sys.stderr)
     except Exception as e:  # last safety net: colors are never a reason to crash
         print(f"[colors] Error loading the palette: {e}", file=sys.stderr)
-        return Palette()
+        palette = Palette()
+    for key, color in (overrides or {}).items():
+        if key in ("foreground", "background"):
+            setattr(palette, key, color)
+        elif key.startswith("bright_"):
+            palette.bright[key[len("bright_"):]] = color
+        else:
+            palette.normal[key] = color
+    if overrides:
+        palette.source += " + [palette]"
     return palette
 
 
@@ -277,7 +324,10 @@ def load_terminal_font(config_path=None):
 
 
 if __name__ == "__main__":
-    p = load_palette(sys.argv[1] if len(sys.argv) > 1 else None)
+    from griffel.config import get_str, load_config
+    config = load_config()  # [colors] source and [palette] from the own config
+    p = load_palette(sys.argv[1] if len(sys.argv) > 1 else None,
+                     get_str(config, "colors", "source") or "auto", palette_overrides(config.get("palette")))
     print(f"Source: {p.source}")
     for name in COLOR_NAMES:
         print(f"  {name:8} normal {p.normal[name]}   bright {p.bright[name]}")

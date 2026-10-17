@@ -399,7 +399,7 @@ class Canvas(InputMixin, BoardMixin, OutputMixin, HistoryMixin, PointerMixin, Cr
         QApplication.sendEvent(self.scene_, QEvent(QEvent.WindowActivate))
 
     def use_mono_family(self, family, elements):
-        """Font for monospace text ([text] mono_font, otherwise from Alacritty). The elements
+        """Font for monospace text ([text] mono_font, otherwise from Alacritty, if there is one). The elements
         were loaded before it was known: monospace texts and labels build their font anew."""
         # Qt may list a family with its foundry, e.g. "RobotoMono Nerd Font Mono [GOOG]"
         installed = {name.split(" [")[0] for name in QFontDatabase.families()}

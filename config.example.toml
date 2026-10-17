@@ -13,20 +13,32 @@ default = "freehand"
 # Order of the color bar = order of the shortcuts Shift+A S D F G Z X C V B.
 # Names: black red green yellow blue magenta cyan white,
 #        the same with "bright_" in front (e.g. "bright_red"), and "foreground".
-# The color values themselves come from the Alacritty config.
+# The color values themselves come from the source below and [palette].
 order = ["yellow", "magenta", "cyan", "green", "red", "blue", "white", "bright_black", "foreground"]
 # Color at startup (same names as above)
 default = "yellow"
+# Where the color values come from: "auto" = the Alacritty config if there is one, otherwise
+# the built-in palette (Tomorrow Night); "alacritty" = the same, with a hint if it is missing;
+# "builtin" = never read the Alacritty config. [palette] overrides single values in every case.
+source = "auto"
 
-# Whiteboard with a light background (e.g. paper white, Ctrl+B): the Alacritty colors are made
+# Whiteboard with a light background (e.g. paper white, Ctrl+B): the palette colors are made
 # for a dark background, so the tool automatically shows them darkened there (same hue,
 # contrast at least 3.0). The base color is what gets saved; back on a dark background
 # everything is as before. Here you can set individual light variants yourself:
 # name as above = "#rrggbb" (or another color name).
-# See what comes out automatically: python colors.py
+# See what comes out automatically: PYTHONPATH=src python -m griffel.colors
 [colors.light]
 # yellow = "#8f5e15"
 # foreground = "#343b58"
+
+[palette]
+# Own color values ("#rrggbb"), they win over the source ([colors] source). Names: black red
+# green yellow blue magenta cyan white, the same with "bright_" in front, foreground and
+# background (bar and whiteboard). Missing names come from the source.
+# red = "#f7768e"
+# bright_red = "#ff7a93"
+# background = "#1a1b26"
 
 [size]
 # Size in 4 levels, Alt+A S D F picks level 1-4 (also by clicking the bar).
@@ -38,7 +50,7 @@ text = [16, 28, 40, 64]      # font size, each 6-300
 
 [ui]
 # Colors of the bar and the overlays. Names as in [colors] plus "background"
-# (background from Alacritty colors.primary) or directly "#rrggbb".
+# (background of the palette, from Alacritty colors.primary) or directly "#rrggbb".
 bar_background = "background"
 bar_foreground = "foreground"   # icons, frames, labels
 bar_accent = "blue"             # highlights, e.g. keys in the overview (?)
@@ -59,15 +71,16 @@ dialogs = "rofi"
 
 [board]
 # Whiteboard (griffel --board): background color. Name as in [colors],
-# "background" (Alacritty background) or "#rrggbb"
+# "background" (background of the palette) or "#rrggbb"
 background = "background"
 # Backgrounds to cycle through with Ctrl+B / Ctrl+Shift+B (undo step, saved with the drawing).
 # Names as above. If the start background is not in the list, cycling starts with the first one.
-backgrounds = ["background", "#f8f6f0"]   # Alacritty (dark), paper white (light)
+backgrounds = ["background", "#f8f6f0"]   # palette background (dark), paper white (light)
 
 [text]
 # Font for monospace text (Alt+V, for code, commands, paths). Empty = the font of the
-# terminal from the Alacritty config ([font.bold], otherwise [font.normal]); if that is
+# terminal from the Alacritty config ([font.bold], otherwise [font.normal]), if there is one
+# (also with [colors] source = "builtin"); if that is
 # missing too, the system monospace font.
 mono_font = ""
 

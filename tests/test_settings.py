@@ -150,6 +150,37 @@ def main():
         broken_font, _ = quiet(colors.load_terminal_font, broken)
     check(f"terminal font: bold first, else normal, via import, none -> None ({fonts})",
           fonts == ["Bold Mono", "Plain Mono", "Plain Mono", None] and broken_font is None)
+    # Palette: [colors] source and [palette] on top of Alacritty or the built-in values
+    with tempfile.TemporaryDirectory() as tmp:
+        alacritty = Path(tmp) / "alacritty.toml"
+        alacritty.write_text('[colors.normal]\nred = "#aa0000"\ngreen = "#00aa00"\n'
+                             '[colors.primary]\nbackground = "#101010"\n')
+        own = colors.palette_overrides({"red": "#FF0000", "bright-blue": "0x0000ff", "background": "#202020"})
+        mixed = colors.load_palette(alacritty, "auto", own)
+        builtin = colors.load_palette(alacritty, "builtin")
+        only_alacritty = colors.load_palette(alacritty, "alacritty")
+    check("palette: [palette] wins over Alacritty, the rest from Alacritty or built-in",
+          mixed.lookup("red") == "#ff0000" and mixed.lookup("green") == "#00aa00"
+          and mixed.lookup("bright_blue") == "#0000ff" and mixed.background == "#202020"
+          and mixed.lookup("yellow") == colors.DEFAULT_NORMAL["yellow"]
+          and only_alacritty.lookup("red") == "#aa0000")
+    check("palette: source = builtin ignores Alacritty",
+          builtin.lookup("red") == colors.DEFAULT_NORMAL["red"] and builtin.background == colors.DEFAULT_BACKGROUND)
+    bad, hints = quiet(colors.palette_overrides, {"purple": "#123456", "red": "rot", "blue": 5, "green": "#00ff00"})
+    check(f"palette: unknown names and values skipped with a hint ({bad})",
+          bad == {"green": "#00ff00"} and hints.count("[palette]") == 3)
+    missing, hints = quiet(colors.load_palette, None, "alacritty")
+    unknown, hints2 = quiet(colors.load_palette, None, "kitty")
+    check("palette: source = alacritty without a config / unknown source -> hint, built-in palette",
+          missing.lookup("red") == colors.DEFAULT_NORMAL["red"] and "no Alacritty config" in hints
+          and unknown.lookup("red") == colors.DEFAULT_NORMAL["red"] and "unknown" in hints2)
+    themed = st.Settings({"colors": {"source": "builtin", "order": ["red", "green"]},
+                          "palette": {"red": "#ff0000", "background": "#202020"}}, False)
+    check("palette: Settings takes [palette] for the bar and the theme background",
+          themed.swatches == ["#ff0000", colors.DEFAULT_NORMAL["green"]]
+          and themed.palette.lookup("background") == "#202020"
+          and themed.theme.background.name() == "#202020")
+
     own_font = st.Settings({"text": {"mono_font": "My Mono"}}, False)
     check("monospace: [text] mono_font, empty = terminal font (none in the test: system font)",
           own_font.mono_family == "My Mono" and st.Settings({"text": {"mono_font": ""}}, False).mono_family is None

@@ -44,7 +44,7 @@ Wayland doesn't work.
 - On a light background colors are darkened automatically so they stay readable
 
 **Setup**
-- Colors and the monospace font come from your Alacritty config
+- Colors and the monospace font come from your Alacritty config if you have one; otherwise a built-in palette, and your own colors in the TOML file
 - Keys, tools, colors and sizes can be changed in a TOML file
 - Scales with the screen, so it stays usable on 4K
 

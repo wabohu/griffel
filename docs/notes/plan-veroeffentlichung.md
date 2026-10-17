@@ -109,7 +109,7 @@ Gefunden beim Durchsehen des Codes, sortiert nach Wirkung auf fremde Nutzer.
 - Kommentare „like my keyboard in Vial“ neutral formulieren
 - Test: `tests/test_settings.py` (Werte, Fallbacks), `test_help.py` je ein Foto pro Variante
 
-### 2.3 Farben und Monospace-Schrift aus Alacritty
+### 2.3 Farben und Monospace-Schrift aus Alacritty – erledigt 2026-10-17, siehe `plan-farben.md`
 - Fallback existiert schon (Tomorrow Night), stürzt also nicht ab. Aber wer kein Alacritty
   nutzt, hat keinen Weg zur eigenen Palette außer `#rrggbb` an jeder Stelle
 - Neu: `[palette]` in der eigenen Config (`red = "#..."`, `bright_red`, `foreground`,

@@ -11,7 +11,7 @@ from pathlib import Path
 
 from PySide6.QtGui import QColor
 
-from griffel.colors import load_palette, load_terminal_font
+from griffel.colors import load_palette, load_terminal_font, palette_overrides
 from griffel.config import get_float, get_int, get_int_list, get_list, get_str
 from griffel.export import default_output_dir
 from griffel.history import default_history_dir
@@ -39,7 +39,7 @@ WHEEL_PAN_STEP = 80
 BOARD_EXTENT = 1_000_000
 BOARD_EXPORT_MARGIN = 32
 DEFAULT_BOARD_BACKGROUND = "background"
-# Backgrounds to cycle through (Ctrl+B): Alacritty background (dark), paper white (light)
+# Backgrounds to cycle through (Ctrl+B): palette background (dark), paper white (light)
 DEFAULT_BOARD_BACKGROUNDS = ("background", "#f8f6f0")
 
 # Move the selection with hjkl ([move]): screen pixels per key press, normal and fine (Shift)
@@ -62,7 +62,7 @@ WHEEL_TEXT_STEP = 2
 WHEEL_STROKE_STEP = 1
 
 # Bar colors ([ui]): names as in [colors] plus "background", or "#rrggbb"
-DEFAULT_BAR_BACKGROUND = "background"  # background from Alacritty colors.primary
+DEFAULT_BAR_BACKGROUND = "background"  # background of the palette (Alacritty colors.primary)
 DEFAULT_BAR_FOREGROUND = "foreground"
 DEFAULT_BAR_ACCENT = "blue"  # highlights, e.g. keys in the overview (?)
 DEFAULT_BAR_HEADING = "magenta"  # headings, e.g. in the overview (?)
@@ -137,10 +137,12 @@ class Settings:
             if low <= legacy <= high:
                 self.text_sizes[self.default_size_level] = legacy
 
-        # Color values from the Alacritty config (fallback: default palette),
+        # Color values: built-in palette, Alacritty on top ([colors] source), [palette] on top;
         # choice, order and start color from your own config
-        self.palette = load_palette()
-        # Monospace text ([text] mono_font, empty = the terminal font from Alacritty, None = system)
+        self.palette = load_palette(source=get_str(config, "colors", "source") or "auto",
+                                    overrides=palette_overrides(config.get("palette")))
+        # Monospace text ([text] mono_font, empty = the terminal font from Alacritty if there
+        # is one, None = system)
         self.mono_family = get_str(config, "text", "mono_font") or load_terminal_font()
         self.swatches = self.palette.swatches(get_list(config, "colors", "order"))
         self.colors = [QColor(c) for c in self.swatches]
@@ -359,7 +361,7 @@ class Settings:
         return overrides
 
     def load_theme(self, config):
-        """Bar colors from [ui]; unknown names or values -> Alacritty colors."""
+        """Bar colors from [ui]; unknown names or values -> palette colors."""
         def color(key, default):
             return self.config_color(config, "ui", key, default)
 
