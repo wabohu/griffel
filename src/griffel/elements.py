@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (QGraphicsItem, QGraphicsPathItem, QGraphicsTextIt
                                QStyleOptionGraphicsItem)
 
 from griffel.colors import contrast
-from griffel.tools import RECT_RADIUS, Tool, marker_radius, shape_path
+from griffel.tools import RECT_RADIUS, Tool, curve_path, fit_cubic, marker_radius, shape_path
 
 
 
@@ -91,6 +91,18 @@ ELLIPSE_LABEL_SHARE = 0.7
 LINE_LABEL_TOOLS = (Tool.LINE, Tool.ARROW)
 LABEL_BOX_PADDING = 4
 LABEL_BOX_RADIUS = 4
+# Arrow variants (roadmap 21): straight from start to end, or a cubic Bézier curve
+ARROW_KINDS = ("straight", "curve")
+
+
+def is_curve(item):
+    """Is item a curved arrow (points = [start, c1, c2, end])?"""
+    return isinstance(item, ShapeElement) and item.tool == Tool.ARROW and item.arrow_kind == "curve"
+
+
+def takes_label(item):
+    """Can item get a label by double-clicking it? Curved arrows cannot (yet)."""
+    return isinstance(item, ShapeElement) and item.tool in LABEL_TOOLS and not is_curve(item)
 
 
 class PoseMixin:
@@ -168,6 +180,7 @@ class ShapeElement(PoseMixin, QGraphicsPathItem):
 
     points (local, relative to pos):
       freehand: all points of the stroke
+      curved arrow: [start, c1, c2, end] (c1, c2: control points of the Bézier curve)
       others:   [start, end]
     radius: corner radius, only for rectangles
     """
@@ -185,6 +198,8 @@ class ShapeElement(PoseMixin, QGraphicsPathItem):
         # Marker: numbers or letters, order of placement (the number is the rank in it)
         self.marker_kind = "number"
         self.marker_order = 0
+        self.arrow_kind = "straight"  # arrow: "straight" or "curve" (ARROW_KINDS, set_curve)
+        self.stroke = None  # curved arrow while drawing: the mouse points the curve is fitted to
         self.label = None  # rectangle/ellipse: TextElement as a child item, see set_label
         # Line/arrow: IDs of the elements its start and end are docked to (connectors.py)
         self.ends = [None, None]
@@ -208,6 +223,7 @@ class ShapeElement(PoseMixin, QGraphicsPathItem):
             "width": self.width,
             **({"radius": self.radius} if self.tool == Tool.RECT else {}),
             **({"kind": self.marker_kind, "order": self.marker_order} if self.tool == Tool.MARKER else {}),
+            **({"kind": "curve"} if is_curve(self) else {}),
             **({"label": {"text": self.label.toPlainText(), "font_size": self.label.font_size,
                           **self.label.font_dict()}}
                if self.label is not None else {}),
@@ -229,6 +245,8 @@ class ShapeElement(PoseMixin, QGraphicsPathItem):
             raise ValueError(f"radius {radius!r} invalid")
         item = cls(tool, QPointF(*data["pos"]), data["color"], data["width"],
                    element_id=data.get("id"), radius=radius)
+        if tool == Tool.ARROW and data.get("kind") == "curve":  # older files: always straight
+            item.arrow_kind = "curve"
         item.points = [QPointF(x, y) for x, y in data["points"]]
         if tool == Tool.MARKER:
             item.marker_kind = "letter" if data.get("kind") == "letter" else "number"
@@ -236,14 +254,14 @@ class ShapeElement(PoseMixin, QGraphicsPathItem):
             if isinstance(order, bool) or not isinstance(order, (int, float)):
                 raise ValueError(f"order {order!r} invalid")
             item.marker_order = order
-        expected = None if tool == Tool.FREEHAND else 2
+        expected = None if tool == Tool.FREEHAND else 4 if is_curve(item) else 2
         if not item.points or (expected and len(item.points) != expected):
             raise ValueError(f"{tool.name}: wrong number of points")
         item.setRotation(data.get("rotation", 0))
-        if tool in (Tool.LINE, Tool.ARROW):
+        if tool in (Tool.LINE, Tool.ARROW) and not is_curve(item):
             item.ends = list(ends)
         item.rebuild()
-        if label is not None and tool in LABEL_TOOLS:
+        if label is not None and takes_label(item):
             text, size = label["text"], label["font_size"]
             if not isinstance(text, str) or isinstance(size, bool) or not isinstance(size, (int, float)) or size <= 0:
                 raise ValueError(f"label {label!r} invalid")
@@ -324,6 +342,23 @@ class ShapeElement(PoseMixin, QGraphicsPathItem):
     def set_end(self, scene_pos):
         """Set the end point of a two-point shape (while drawing it with the mouse)."""
         self.points[1] = self.mapFromScene(scene_pos)
+        self.rebuild()
+
+    def set_curve(self):
+        """Make a new arrow (still being drawn) the curved variant: four points, the
+        stroke starts at the origin."""
+        self.arrow_kind = "curve"
+        self.points = [QPointF(0, 0) for _ in range(4)]
+        self.stroke = [QPointF(0, 0)]
+        self.rebuild()
+
+    def add_curve_point(self, scene_pos, straight_tolerance):
+        """Curved arrow while drawing: append a mouse point and fit the curve anew
+        (tools.fit_cubic). straight_tolerance: up to this distance from the chord
+        (local units) the stroke counts as straight."""
+        self.stroke.append(self.mapFromScene(scene_pos))
+        start, end = self.stroke[0], self.stroke[-1]
+        self.points = [start, *fit_cubic(self.stroke, straight_tolerance), end]
         self.rebuild()
 
     def add_point(self, scene_pos):
@@ -476,13 +511,13 @@ class ShapeElement(PoseMixin, QGraphicsPathItem):
     # --- Handles for resizing (select tool) ---
     def handle_points(self):
         """Handle points in local coordinates: end points for line/arrow, otherwise 4 corners."""
-        if self.tool in (Tool.LINE, Tool.ARROW, Tool.MARKER):  # marker: tip and circle
+        if self.tool in (Tool.LINE, Tool.ARROW, Tool.MARKER):  # marker: tip and circle; curve: all four
             return list(self.points)
         return corners(self.box(self.points))
 
     def box(self, points):
         """Bounding rectangle of the geometry (without stroke width)."""
-        if self.tool == Tool.FREEHAND:
+        if self.tool == Tool.FREEHAND or len(points) == 4:  # freehand, curve: all points
             return QPolygonF(points).boundingRect()
         return QRectF(points[0], points[1]).normalized()
 
@@ -502,7 +537,15 @@ class ShapeElement(PoseMixin, QGraphicsPathItem):
         """Handle index was dragged to scene_pos; start = geometry() at drag start."""
         local = self.mapFromScene(scene_pos)  # pos does not change while dragging
         points = [QPointF(p) for p in start[1]]
-        if self.tool in (Tool.LINE, Tool.ARROW, Tool.MARKER):
+        if is_curve(self):
+            # An end takes its control point along, so the curve keeps its direction there
+            # (like dragging a node in Inkscape); a control point moves alone
+            delta = local - points[index]
+            points[index] = local
+            if index in (0, 3):
+                neighbor = 1 if index == 0 else 2
+                points[neighbor] = points[neighbor] + delta
+        elif self.tool in (Tool.LINE, Tool.ARROW, Tool.MARKER):
             points[index] = local
         elif self.tool == Tool.FREEHAND:
             # Stretch all points; the opposite corner stays fixed
@@ -533,6 +576,8 @@ class ShapeElement(PoseMixin, QGraphicsPathItem):
             path.lineTo(first.x() + 0.01, first.y())
             for point in self.points[1:]:
                 path.lineTo(point)
+        elif is_curve(self):
+            path = curve_path(self.points, self.width)
         else:
             path = shape_path(self.tool, self.points[0], self.points[1], self.width, self.radius)
         self.setPath(path)

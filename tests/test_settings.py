@@ -63,6 +63,11 @@ def main():
     check("radii from [pointer], invalid -> default with a hint",
           own.spotlight_radius == 140 and own.lens_radius == 100 and "lens_radius" in hints
           and wrong.spotlight_radius == 90)
+    curve, _ = quiet(st.Settings, {"arrow": {"default": "curve"}}, False)
+    odd, odd_hints = quiet(st.Settings, {"arrow": {"default": "wavy"}}, False)
+    check("arrow variant: straight by default, curve from [arrow], unknown -> straight with a hint",
+          s.default_arrow_kind == "straight" and curve.default_arrow_kind == "curve"
+          and odd.default_arrow_kind == "straight" and "[arrow]" in odd_hints)
     check("screenshot: corner radius, no whiteboard background",
           s.rect_radius == st.DEFAULT_RECT_RADIUS and s.board_background is None and s.board_backgrounds is None)
 

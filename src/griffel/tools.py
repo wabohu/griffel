@@ -70,16 +70,7 @@ def shape_path(tool, start, end, pen_width, radius=RECT_RADIUS):
     elif tool == Tool.ARROW:
         path.moveTo(start)
         path.lineTo(end)
-        angle = math.atan2(end.y() - start.y(), end.x() - start.x())
-        head_len = max(14, pen_width * 4)
-        spread = math.radians(25)
-        for sign in (-1, 1):
-            tip = QPointF(
-                end.x() - head_len * math.cos(angle + sign * spread),
-                end.y() - head_len * math.sin(angle + sign * spread),
-            )
-            path.moveTo(end)
-            path.lineTo(tip)
+        add_arrow_head(path, end, math.atan2(end.y() - start.y(), end.x() - start.x()), pen_width)
     elif tool == Tool.RECT:
         # Qt shrinks the radius itself if the rectangle is too small for it
         path.addRoundedRect(QRectF(start, end).normalized(), radius, radius)
@@ -94,8 +85,94 @@ def shape_path(tool, start, end, pen_width, radius=RECT_RADIUS):
     return path
 
 
-def tool_icon(tool):
-    """Icon for the tool bar, in field coordinates 0-30 (bottom right stays free for the key)."""
+def arrow_head_length(pen_width):
+    return max(14, pen_width * 4)
+
+
+def add_arrow_head(path, end, angle, pen_width):
+    """Two strokes back from end, against the direction angle (radians)."""
+    head_len = arrow_head_length(pen_width)
+    spread = math.radians(25)
+    for sign in (-1, 1):
+        tip = QPointF(
+            end.x() - head_len * math.cos(angle + sign * spread),
+            end.y() - head_len * math.sin(angle + sign * spread),
+        )
+        path.moveTo(end)
+        path.lineTo(tip)
+
+
+# --- Curved arrow (roadmap 21, plan docs/notes/plan-kurvenpfeil.md) ---
+def straight_controls(start, end):
+    """Control points on the thirds of the chord: the cubic curve is exactly straight."""
+    return start + (end - start) / 3, start + (end - start) * (2 / 3)
+
+
+def fit_cubic(points, straight_tolerance=0.0):
+    """Control points (c1, c2) of the cubic Bézier curve from points[0] to points[-1]
+    that runs as close as possible to all points (least squares).
+
+    Each point gets a parameter t from its share of the stroke length (chord length
+    parametrization); the curve at t is B(t) = b0·P0 + b1·c1 + b2·c2 + b3·P3 with the
+    Bernstein weights b0…b3. Start and end are fixed, so only c1 and c2 are unknown: setting
+    the derivative of the squared error to zero gives two linear equations (per axis).
+    If no point lies further than straight_tolerance from the chord, the curve becomes
+    exactly straight (an almost straight stroke should not sag).
+    """
+    start, end = points[0], points[-1]
+    chord = end - start
+    length = math.hypot(chord.x(), chord.y())
+    if length > 1e-9:
+        deviation = max(abs(chord.x() * (p.y() - start.y()) - chord.y() * (p.x() - start.x())) / length
+                        for p in points)
+    else:
+        deviation = max(math.hypot(p.x() - start.x(), p.y() - start.y()) for p in points)
+    if len(points) < 3 or deviation <= straight_tolerance:
+        return straight_controls(start, end)
+    steps = [math.hypot(b.x() - a.x(), b.y() - a.y()) for a, b in zip(points, points[1:])]
+    total = sum(steps)
+    if total < 1e-9:
+        return straight_controls(start, end)
+    a11 = a12 = a22 = 0.0
+    x1, x2 = QPointF(0, 0), QPointF(0, 0)
+    run = 0.0
+    for point, step in zip(points, [0.0] + steps):
+        run += step
+        t = run / total
+        u = 1 - t
+        b0, b1, b2, b3 = u ** 3, 3 * u * u * t, 3 * u * t * t, t ** 3
+        rest = point - start * b0 - end * b3  # what c1 and c2 have to explain
+        a11 += b1 * b1
+        a12 += b1 * b2
+        a22 += b2 * b2
+        x1 += rest * b1
+        x2 += rest * b2
+    det = a11 * a22 - a12 * a12
+    if abs(det) < 1e-12:
+        return straight_controls(start, end)
+    return (x1 * a22 - x2 * a12) / det, (x2 * a11 - x1 * a12) / det
+
+
+def curve_path(points, pen_width):
+    """Curved arrow from points = [start, c1, c2, end]: the curve plus the head at the end.
+    The head points along the last stretch of the curve as long as the head (looks right even
+    where the curve bends sharply at its very end)."""
+    start, c1, c2, end = points
+    path = QPainterPath(start)
+    path.cubicTo(c1, c2, end)
+    total = path.length()
+    if total < 1e-6:
+        return path
+    back = path.pointAtPercent(path.percentAtLength(max(0.0, total - arrow_head_length(pen_width))))
+    if math.hypot(end.x() - back.x(), end.y() - back.y()) < 1e-6:
+        back = start
+    add_arrow_head(path, end, math.atan2(end.y() - back.y(), end.x() - back.x()), pen_width)
+    return path
+
+
+def tool_icon(tool, curve=False):
+    """Icon for the tool bar, in field coordinates 0-30 (bottom right stays free for the key).
+    curve: the arrow as the curved variant."""
     path = QPainterPath()
     if tool == Tool.FREEHAND:
         path.moveTo(6, 18)
@@ -103,6 +180,12 @@ def tool_icon(tool):
     elif tool == Tool.LINE:
         path.moveTo(7, 22)
         path.lineTo(22, 7)
+    elif tool == Tool.ARROW and curve:  # arc with the head at its upper end
+        path.moveTo(6, 22)
+        path.cubicTo(8, 10, 14, 7, 22, 8)
+        path.moveTo(16, 4)
+        path.lineTo(22, 8)
+        path.lineTo(17, 13)
     elif tool == Tool.ARROW:
         path.moveTo(7, 22)
         path.lineTo(22, 7)

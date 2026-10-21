@@ -4,7 +4,7 @@
     python tests/regress.py            # compare with tests/regress_reference.png
     python tests/regress.py --update   # rewrite the reference (after an intended visual change)
 
-The scene covers all shapes, colors and sizes via keys, a discarded tiny shape, text,
+The scene covers all shapes (also the curved arrow), colors and sizes via keys, a discarded tiny shape, text,
 moving text, the select tool (hit only on the edge, recolor, move, drag a handle)
 and undo/redo. Runs on Qt's offscreen platform and
 with an empty HOME/XDG_CONFIG_HOME: neither your own config nor the Alacritty theme
@@ -12,6 +12,7 @@ affect the result (the default palette applies).
 
 Exit code 0 = image identical, 1 = difference (a diff image is saved).
 """
+import math
 import os
 import sys
 import tempfile
@@ -84,6 +85,13 @@ def draw_scene(canvas, view):
     key(Qt.Key_Escape)
     key(Qt.Key_S); drag((500, 300), (700, 450))                                     # line …
     key(Qt.Key_R); key(Qt.Key_R); key(Qt.Key_R, Qt.ShiftModifier)                  # … undo, undo, redo
+    key(Qt.Key_D); key(Qt.Key_D)                                                    # curved arrow:
+    QTest.mousePress(view, Qt.LeftButton, pos=QPoint(860, 440))                     # a shaky arc
+    for i in range(1, 21):
+        a = math.pi / 2 * i / 20
+        QTest.mouseMove(view, QPoint(round(1060 - 200 * math.cos(a)) + (4 if i % 2 else 0),
+                                     round(440 - 160 * math.sin(a))))
+    QTest.mouseRelease(view, Qt.LeftButton, pos=QPoint(1060, 280))
 
 
 def main():

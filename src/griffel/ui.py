@@ -8,7 +8,7 @@ from PySide6.QtCore import QPointF, QRectF, QSize, QSizeF, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QFont, QFontDatabase, QFontMetricsF, QPainter, QPen
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QWidget
 
-from griffel.tools import tool_icon
+from griffel.tools import Tool, tool_icon
 
 
 class Theme:
@@ -567,7 +567,7 @@ class HelpPanel(QWidget):
             pen.setJoinStyle(Qt.RoundJoin)
             p.setPen(pen)
             p.setBrush(Qt.NoBrush)
-            p.drawPath(tool_icon(tool))
+            p.drawPath(tool_icon(tool, curve=self.data.get("curve", False) and tool == Tool.ARROW))
             p.restore()
         elif label:
             p.setFont(label_f)

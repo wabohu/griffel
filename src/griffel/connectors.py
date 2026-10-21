@@ -15,7 +15,7 @@ import math
 from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QPainterPath, QPainterPathStroker
 
-from griffel.elements import ImageElement, ShapeElement, TextElement, is_label
+from griffel.elements import ImageElement, ShapeElement, TextElement, is_curve, is_label
 from griffel.tools import Tool
 
 # Lines and arrows can be connectors; these shapes can be docking targets
@@ -31,7 +31,8 @@ DOCK_MARGIN = 16
 
 
 def is_connector(item):
-    return isinstance(item, ShapeElement) and item.tool in CONNECTOR_TOOLS
+    """Curved arrows do not dock (yet, roadmap 21): their curve would have to deform along."""
+    return isinstance(item, ShapeElement) and item.tool in CONNECTOR_TOOLS and not is_curve(item)
 
 
 def is_target(item):

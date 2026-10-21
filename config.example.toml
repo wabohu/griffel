@@ -91,6 +91,11 @@ mono_font = ""
 radius = 4          # screenshot mode
 radius_board = 20   # whiteboard
 
+[arrow]
+# Arrow variant at startup: "straight" or "curve" (drawn freehand, smoothed into a round curve).
+# Pressing the arrow key again while the arrow is active toggles between them.
+default = "straight"
+
 [move]
 # Move the selected element with h j k l: screen pixels per key press (1-500)
 step = 10          # h j k l

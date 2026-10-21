@@ -132,6 +132,7 @@ class Canvas(InputMixin, BoardMixin, OutputMixin, HistoryMixin, PointerMixin, Cr
         self.crop_edit = None     # while dragging: change handle, move or new
         self.crop_selected = False  # select tool: crop clicked on its edge, shows handles
         self.marker_kind = "number"  # new markers: "number" (1 2 3) or "letter" (A B C)
+        self.arrow_kind = self.settings.default_arrow_kind  # new arrows: "straight" or "curve"
         self.pointer_mode = None  # pointing: None, "spotlight" or "lens" (canvas_pointer.py)
         self.cursor_cache = {}    # finished mouse cursors per tool/color/width
         self.asking = False  # rofi prompt open: do not take focus back (canvas_output.ask)
@@ -150,7 +151,7 @@ class Canvas(InputMixin, BoardMixin, OutputMixin, HistoryMixin, PointerMixin, Cr
         labels += [self.settings.keymap.label(f"tool_{i}") for i in range(1, len(self.settings.tools) + 1)]
         labels += [self.settings.keymap.label("tool_marker")]
         labels += [] if board else [self.settings.keymap.label("tool_blur")]
-        self.tool_bar = ToolBar([tool_icon(t) for t in self.bar_tools], labels, self.settings.theme)
+        self.tool_bar = ToolBar([self.bar_icon(t) for t in self.bar_tools], labels, self.settings.theme)
         # lambda: translates the bar index into the matching tool
         self.tool_bar.selected.connect(lambda i: self.set_tool(self.bar_tools[i]))
         self.palette_bar = PaletteBar(self.settings.swatches, self.settings.theme)
@@ -220,7 +221,7 @@ class Canvas(InputMixin, BoardMixin, OutputMixin, HistoryMixin, PointerMixin, Cr
         }
         for i in range(len(self.settings.tools)):
             # Default argument i=i: otherwise all lambdas would end up seeing the same (last) i
-            self.actions[f"tool_{i + 1}"] = lambda i=i: self.set_tool(self.settings.tools[i])
+            self.actions[f"tool_{i + 1}"] = lambda i=i: self.tool_key(self.settings.tools[i])
         for i in range(len(self.settings.colors)):
             self.actions[f"color_{i + 1}"] = lambda i=i: self.set_color(i)
         for i in range(SIZE_LEVELS):
@@ -477,6 +478,23 @@ class Canvas(InputMixin, BoardMixin, OutputMixin, HistoryMixin, PointerMixin, Cr
         self.marker_kind = "letter" if self.marker_kind == "number" else "number"
         self.report("Marker: A B C" if self.marker_kind == "letter" else "Marker: 1 2 3")
 
+    def tool_key(self, tool):
+        """Key of a tool slot: select the tool; the arrow key with the arrow already active
+        toggles straight / curved (like the marker key)."""
+        if tool != Tool.ARROW or self.tool != Tool.ARROW:
+            self.set_tool(tool)
+            return
+        self.arrow_kind = "straight" if self.arrow_kind == "curve" else "curve"
+        if Tool.ARROW in self.bar_tools:
+            self.tool_bar.icons[self.bar_tools.index(Tool.ARROW)] = self.bar_icon(Tool.ARROW)
+            self.tool_bar.update()
+        self.refresh_cursor()
+        self.report("Arrow: curved" if self.arrow_kind == "curve" else "Arrow: straight")
+
+    def bar_icon(self, tool):
+        """Icon of tool in the bar; the arrow shows its current variant."""
+        return tool_icon(tool, curve=tool == Tool.ARROW and self.arrow_kind == "curve")
+
     def next_marker_order(self):
         """Order for a new marker: after all existing ones."""
         orders = [e.marker_order for e in self.elements() if isinstance(e, ShapeElement) and e.tool == Tool.MARKER]
@@ -489,6 +507,7 @@ class Canvas(InputMixin, BoardMixin, OutputMixin, HistoryMixin, PointerMixin, Cr
         caps = keyboard.caps(st.help_keyboard, layout, st.help_stagger, st.help_outer)
         data = overview(st.keymap, st.tools, len(st.colors), SIZE_LEVELS, self.board,
                         caps, keyboard.FULL_ROWS[layout])
+        data["curve"] = self.arrow_kind == "curve"  # the arrow key shows the active variant
         self.help_panel.set_content(data, self.palette_bar.colors)  # colors as in the bar
         self.help_panel.show_centered()
 

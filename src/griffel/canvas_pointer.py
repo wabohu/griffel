@@ -14,7 +14,7 @@ drawForeground (InputMixin) via paint_pointer().
 
 Mixin like BoardMixin (canvas_board.py). Manages (created in Canvas.__init__):
 pointer_mode (None, "spotlight", "lens"), cursor_cache.
-Reads from the Canvas: tool, board, pen_color, pen_width, ui_scale, scene_, settings, zoom(),
+Reads from the Canvas: tool, arrow_kind, board, pen_color, pen_width, ui_scale, scene_, settings, zoom(),
 adapt_color().
 """
 import math
@@ -47,8 +47,8 @@ def contrast_stroke(p, path, color, width):
     p.drawPath(path)
 
 
-def tool_mark(tool, size):
-    """Small shape of the tool for the mouse cursor, centered on (0, 0)."""
+def tool_mark(tool, size, curve=False):
+    """Small shape of the tool for the mouse cursor, centered on (0, 0). curve: curved arrow."""
     h = size / 2
     path = QPainterPath()
     if tool == Tool.RECT:
@@ -58,6 +58,12 @@ def tool_mark(tool, size):
     elif tool == Tool.LINE:
         path.moveTo(-h, h)
         path.lineTo(h, -h)
+    elif tool == Tool.ARROW and curve:
+        path.moveTo(-h, h)
+        path.cubicTo(-h * .8, -h * .3, -h * .1, -h * .8, h, -h * .7)
+        path.moveTo(h * .2, -h * 1.15)
+        path.lineTo(h, -h * .7)
+        path.lineTo(h * .3, -h * .1)
     elif tool == Tool.ARROW:
         path.moveTo(-h, h)
         path.lineTo(h, -h)
@@ -86,8 +92,9 @@ def tool_mark(tool, size):
     return path
 
 
-def make_cursor(tool, color, stroke_px, scale):
-    """Crosshair mouse cursor; stroke_px = stroke width on screen (None = no circle)."""
+def make_cursor(tool, color, stroke_px, scale, curve=False):
+    """Crosshair mouse cursor; stroke_px = stroke width on screen (None = no circle),
+    curve: the mark of the curved arrow."""
     s = scale
     radius = max(CURSOR_MIN_RADIUS * s, (stroke_px or 0) / 2)
     radius = min(radius, 120 * s)  # huge zooms: do not make the cursor arbitrarily large
@@ -113,7 +120,7 @@ def make_cursor(tool, color, stroke_px, scale):
         p.setPen(QPen(faint, max(1.0, 0.8 * s)))
         p.drawEllipse(QPointF(0, 0), radius, radius)
     p.translate(mark_at, mark_at)
-    contrast_stroke(p, tool_mark(tool, CURSOR_MARK * s), color, 1.3 * s)
+    contrast_stroke(p, tool_mark(tool, CURSOR_MARK * s, curve), color, 1.3 * s)
     p.end()
     return QCursor(pixmap, half, half)
 
@@ -168,9 +175,10 @@ class PointerMixin:
                 self.cursor_cache[key] = make_select_cursor(color, self.ui_scale)
             return self.cursor_cache[key]
         stroke = None if self.tool == Tool.TEXT else self.pen_width * self.zoom()
-        key = (self.tool, color.name(), None if stroke is None else round(stroke, 1), self.ui_scale)
+        curve = self.tool == Tool.ARROW and self.arrow_kind == "curve"
+        key = (self.tool, curve, color.name(), None if stroke is None else round(stroke, 1), self.ui_scale)
         if key not in self.cursor_cache:
-            self.cursor_cache[key] = make_cursor(self.tool, color, stroke, self.ui_scale)
+            self.cursor_cache[key] = make_cursor(self.tool, color, stroke, self.ui_scale, curve)
         return self.cursor_cache[key]
 
     def refresh_cursor(self):

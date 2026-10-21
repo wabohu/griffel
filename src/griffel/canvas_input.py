@@ -21,8 +21,8 @@ from griffel import connectors
 from griffel.colors import contrast
 from griffel.commands import (AddItemCommand, EditTextCommand, MoveItemCommand, PropertyCommand, RemoveItemCommand,
                       ReorderCommand, SetLabelCommand, property_command)
-from griffel.elements import LABEL_TOOLS, ShapeElement, TextElement, is_label
-from griffel.settings import (HANDLE_GRAB, HANDLE_SIZE, ROTATE_HANDLE_OFFSET, STROKE_WIDTH_RANGE,
+from griffel.elements import ShapeElement, TextElement, is_curve, is_label, takes_label
+from griffel.settings import (CURVE_STRAIGHT_PX, HANDLE_GRAB, HANDLE_SIZE, ROTATE_HANDLE_OFFSET, STROKE_WIDTH_RANGE,
                       TEXT_SIZE_RANGE, WHEEL_STROKE_STEP, WHEEL_TEXT_STEP, clamp)
 from griffel.tools import Tool
 
@@ -31,7 +31,8 @@ DOCK_HINT_WIDTH = 10
 
 # handle_at() returns this instead of a corner number when the mouse is on the rotate handle
 ROTATE_HANDLE = "rotate"
-# Not rotatable: lines/arrows turn via their end points, blur and markers do not rotate at all
+# Not rotatable: lines/arrows turn via their end points, blur and markers do not rotate at all.
+# Curved arrows do get the rotate handle (their control points would not turn along otherwise)
 NOT_ROTATABLE = (Tool.LINE, Tool.ARROW, Tool.MARKER, Tool.BLUR)
 
 
@@ -129,6 +130,8 @@ class InputMixin:
         if self.tool == Tool.MARKER:
             self.current_item.marker_kind = self.marker_kind
             self.current_item.marker_order = self.next_marker_order()
+        if self.tool == Tool.ARROW and self.arrow_kind == "curve":
+            self.current_item.set_curve()  # drawn freehand, fitted into a round curve
         self.scene_.addItem(self.current_item)
         if connectors.is_connector(self.current_item):  # line/arrow starting at a shape: dock its start
             target = self.dock_target(pos, self.current_item)
@@ -148,7 +151,7 @@ class InputMixin:
         left = event.button() == Qt.LeftButton
         hit = self.element_at(pos) if left and self.tool == Tool.SELECT and not item else None
         # Rectangle/ellipse: hit on the outline or the label, or a double click into its empty inside
-        shape = hit if isinstance(hit, ShapeElement) and hit.tool in LABEL_TOOLS else None
+        shape = hit if takes_label(hit) else None
         if shape is None and hit is None and left and self.tool == Tool.SELECT and not item:
             shape = self.shape_at(pos)
         if item and left:
@@ -221,6 +224,8 @@ class InputMixin:
         # Tool of the element, not self.tool: a key press in the middle of dragging changes nothing
         if self.current_item.tool == Tool.FREEHAND:
             self.current_item.add_point(pos)
+        elif is_curve(self.current_item):
+            self.current_item.add_curve_point(pos, self.screen_px(CURVE_STRAIGHT_PX))
         else:
             self.current_item.set_end(pos)
             if connectors.is_connector(self.current_item):
@@ -320,6 +325,8 @@ class InputMixin:
         too_small = (pos - self.start_pos).manhattanLength() < 3
         if self.current_item.tool == Tool.MARKER and too_small:
             self.current_item.set_end(self.start_pos)  # click: only the circle, without a pointer line
+        if is_curve(self.current_item):
+            self.current_item.stroke = None  # only needed while drawing
         if self.current_item.tool not in (Tool.FREEHAND, Tool.MARKER) and too_small:
             self.scene_.removeItem(self.current_item)
         else:
@@ -393,8 +400,7 @@ class InputMixin:
         Qt concept: items(…, IntersectsItemBoundingRect) finds candidates by their bounding
         rectangle; path().contains() then checks the actual area of the shape."""
         for item in self.scene_.items(pos, Qt.IntersectsItemBoundingRect):  # top to bottom
-            if (isinstance(item, ShapeElement) and item.tool in LABEL_TOOLS
-                    and item.path().contains(item.mapFromScene(pos))):
+            if takes_label(item) and item.path().contains(item.mapFromScene(pos)):
                 return item
         return None
 
@@ -472,15 +478,23 @@ class InputMixin:
         """(rotate handle, point on the frame it hangs on) in scene coordinates, or None if
         item cannot be rotated with the mouse. The handle sits above the middle of the top edge
         and turns with the element; its distance stays the same on screen at any zoom."""
-        if isinstance(item, ShapeElement) and item.tool in NOT_ROTATABLE:
+        if isinstance(item, ShapeElement) and item.tool in NOT_ROTATABLE and not is_curve(item):
             return None
-        corner = [item.mapToScene(p) for p in item.handle_points()]
+        corner = [item.mapToScene(p) for p in self.frame_corners(item)]
         top, center = (corner[0] + corner[1]) / 2, (corner[0] + corner[2]) / 2
         up = top - center
         length = math.hypot(up.x(), up.y())
         if length < 1e-6:  # flat element (e.g. a horizontal stroke): straight up, turned along
             up, length = item.mapToScene(QPointF(0, -1)) - item.mapToScene(QPointF(0, 0)), 1.0
         return top + up * (self.screen_px(ROTATE_HANDLE_OFFSET) / length), top
+
+    def frame_corners(self, item):
+        """Corners of the selection frame in local coordinates: the handles, for a curved arrow
+        (whose handles are its points) the rectangle around the curve."""
+        if is_curve(item):
+            r = item.path().boundingRect()
+            return [r.topLeft(), r.topRight(), r.bottomRight(), r.bottomLeft()]
+        return item.handle_points()
 
     def update_cursor(self, pos):
         """Mouse cursor in the select tool: own arrow, a resize arrow over handles."""
@@ -545,7 +559,14 @@ class InputMixin:
             return
         points = [item.mapToScene(p) for p in item.handle_points()]
         painter.setRenderHint(QPainter.Antialiasing)
-        if len(points) == 4:  # frame through the corners (for lines only the end points)
+        curve = is_curve(item)
+        if curve:  # guide lines from each end to its control point (like in Inkscape)
+            guide = QPen(line, self.ui_scale, Qt.DashLine)
+            guide.setCosmetic(True)
+            painter.setPen(guide)
+            painter.drawLine(points[0], points[1])
+            painter.drawLine(points[3], points[2])
+        elif len(points) == 4:  # frame through the corners (for lines only the end points)
             frame = QPen(line, self.ui_scale, Qt.DashLine)
             frame.setCosmetic(True)  # always 1 pixel (for 1080 px), regardless of zoom/transformation
             painter.setPen(frame)

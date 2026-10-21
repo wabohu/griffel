@@ -1258,6 +1258,70 @@ def main():
           selected and typed.font_kind == "mono")
     fc.close()
 
+    # Curved arrow (roadmap 21): the arrow key again toggles the variant, the stroke becomes
+    # one round Bézier curve (almost straight: exactly straight), four handles, saved and loaded
+    from griffel.elements import is_curve, takes_label
+    cv = make_canvas(plain_bg)
+    cvv = cv.viewport()
+    arrow_slot = f"tool_{cv.settings.tools.index(Tool.ARROW) + 1}"
+
+    def stroke(points):
+        QTest.mousePress(cvv, Qt.LeftButton, Qt.NoModifier, cv.mapFromScene(points[0]))
+        for p in points[1:]:
+            QTest.mouseMove(cvv, cv.mapFromScene(p))
+        QTest.mouseRelease(cvv, Qt.LeftButton, Qt.NoModifier, cv.mapFromScene(points[-1]))
+        return cv.elements()[-1]
+    cv.actions[arrow_slot]()
+    first_press = cv.tool == Tool.ARROW and cv.arrow_kind == "straight"
+    cv.actions[arrow_slot]()
+    check("curved arrow: arrow key selects, pressed again toggles to curved",
+          first_press and cv.arrow_kind == "curve")
+    arc = [QPointF(150 + 200 * math.cos(a), 330 - 200 * math.sin(a) + (3 if i % 2 else -3))
+           for i, a in enumerate(i * math.pi / 2 / 40 for i in range(41))]
+    bent = stroke(arc)
+    start, c1, c2, end = (bent.mapToScene(p) for p in bent.points)
+    kappa = 200 * 0.5523  # control distance of the ideal quarter circle
+    check("curved arrow: a shaky quarter circle becomes a round curve close to the ideal one",
+          is_curve(bent) and len(bent.points) == 4 and near(start, arc[0], 1) and near(end, arc[-1], 1)
+          and near(c1, QPointF(350, 330 - kappa), 25) and near(c2, QPointF(150 + kappa, 130), 25)
+          and bent.stroke is None)
+    line = stroke([QPointF(100 + 10 * i, 60 + (1 if i % 2 else 0)) for i in range(31)])
+    s0, s1, s2, s3 = line.points
+    check("curved arrow: an almost straight stroke becomes exactly straight",
+          is_curve(line) and near(s1, s0 + (s3 - s0) / 3, 0.01) and near(s2, s0 + (s3 - s0) * (2 / 3), 0.01))
+    check("curved arrow: does not dock, gets no label, has a rotate handle",
+          not connectors.is_connector(bent) and not takes_label(bent) and cv.rotate_handle(bent) is not None)
+    geometry = bent.geometry()
+    bent.drag_handle(3, end + QPointF(20, 10), geometry)
+    moved_c2 = bent.mapToScene(bent.points[2])
+    bent.drag_handle(1, c1 + QPointF(-30, 0), geometry)
+    check("curved arrow: dragging an end takes its control point along, a control point moves alone",
+          near(moved_c2, c2 + QPointF(20, 10), 0.01) and near(bent.mapToScene(bent.points[1]), c1 + QPointF(-30, 0), 0.01)
+          and near(bent.mapToScene(bent.points[3]), end, 0.01))
+    bent.set_geometry(geometry)
+    data = bent.to_dict()
+    copy = _Shape.from_dict(data)
+    straight_data = {k: v for k, v in line.to_dict().items() if k != "kind"}
+    try:
+        _Shape.from_dict(straight_data)  # four points without "kind": not a straight arrow
+        broken_rejected = False
+    except ValueError:
+        broken_rejected = True
+    check("curved arrow: saved as kind 'curve' with four points, loads back, wrong point count rejected",
+          data.get("kind") == "curve" and is_curve(copy) and copy.points == bent.points and broken_rejected)
+    drawn = cv.render_image()
+    QTest.keyClick(cv, Qt.Key_S, Qt.ControlModifier)
+    vbg, velems, _, _ = load_document(cv.document_path)
+    vreloaded = make_canvas(QPixmap.fromImage(vbg), velems, cv.document_path)
+    check("curved arrow: saved and loaded (pixel identical)",
+          sum(is_curve(e) for e in velems) == 2 and vreloaded.render_image() == drawn)
+    vreloaded.close()
+    cv.actions[arrow_slot]()
+    plain = stroke([QPointF(300, 300), QPointF(350, 280), QPointF(400, 300)])
+    check("curved arrow: toggled back, the next arrow is straight again",
+          cv.arrow_kind == "straight" and not is_curve(plain) and len(plain.points) == 2)
+    cv.close()
+
     # Key overview: one photo per keyboard picture ([help]) in tests/gui/out/help-keyboard/
     # (look at them: shape and layout are a matter of taste, no test checks that)
     out = Path(__file__).resolve().parent / "gui" / "out" / "help-keyboard"

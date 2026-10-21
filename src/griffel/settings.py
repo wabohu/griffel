@@ -53,6 +53,12 @@ ROTATE_STEP = 5
 # Rotate handle above the frame: distance from the top edge (screen pixels for 1080 px, Canvas.screen_px)
 ROTATE_HANDLE_OFFSET = 24
 
+# Arrow variant at startup ([arrow] default): "straight" or "curve" (roadmap 21)
+DEFAULT_ARROW_KIND = "straight"
+# Curved arrow: a stroke that strays at most this far from the straight line between its ends
+# becomes exactly straight (screen pixels for 1080 px, Canvas.screen_px)
+CURVE_STRAIGHT_PX = 6
+
 # Corner radius of new rectangles ([rect] in the config): screenshot and whiteboard
 DEFAULT_RECT_RADIUS = 4
 DEFAULT_RECT_RADIUS_BOARD = 20
@@ -169,6 +175,13 @@ class Settings:
             print(f"[wm] focus={self.focus_method!r} unknown, allowed: {', '.join(FOCUS_METHODS)}; using 'auto'",
                   file=sys.stderr)
             self.focus_method = "auto"
+
+        # Arrow variant at startup from [arrow] default; the arrow key toggles it in the session
+        arrow_kind = get_str(config, "arrow", "default")
+        self.default_arrow_kind = arrow_kind if arrow_kind in ("straight", "curve") else DEFAULT_ARROW_KIND
+        if arrow_kind is not None and arrow_kind != self.default_arrow_kind:
+            print(f"[arrow] default={arrow_kind!r} unknown, allowed: straight, curve; using "
+                  f"{DEFAULT_ARROW_KIND!r}", file=sys.stderr)
 
         # Corner radius of new rectangles from [rect], separate value in the whiteboard
         self.rect_radius = self.config_radius(config, "radius_board", DEFAULT_RECT_RADIUS_BOARD) \

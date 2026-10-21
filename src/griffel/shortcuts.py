@@ -141,7 +141,7 @@ def sections(keymap, tools, color_count, size_count, board, omit=frozenset()):
         return ", ".join(key for key in map(display, keymap.labels(action)) if key not in omit)
 
     for i, tool in enumerate(tools, start=1):
-        add("Tools", keys(f"tool_{i}"), tool.value)
+        add("Tools", keys(f"tool_{i}"), "Arrow (again: straight / curved)" if tool.value == "Arrow" else tool.value)
     add("Color and size", combine([keymap.label(f"color_{i}") for i in range(1, color_count + 1)]),
         "color from the bar")
     add("Color and size", combine([keymap.label(f"size_{i}") for i in range(1, size_count + 1)]),
