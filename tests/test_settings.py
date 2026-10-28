@@ -15,7 +15,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import regress  # noqa: E402,F401  (sets HOME, config and QT_QPA_PLATFORM)
 
-from PySide6.QtGui import QColor, QGuiApplication  # noqa: E402
+from PySide6.QtGui import QColor, QGuiApplication, QKeySequence  # noqa: E402
 
 failures = []
 
@@ -332,6 +332,13 @@ def main():
     check("overview qwertz: z (blur) not on the keyboard picture, so in the list Tools",
           "z" not in qwertz["keyboard"] and ("z", "Blur") in dict(qwertz["lists"]).get("Tools", [])
           and "y" not in qwertz["keyboard"] and "z" in shortcuts.overview(keymap, [Tool.RECT], 9, 4, False)["keyboard"])
+
+    # The README example for Alt as the window manager's modifier: valid, nothing bound twice
+    alt_free = {"size_1": "ctrl+1", "size_2": "ctrl+2", "size_3": "ctrl+3", "size_4": "ctrl+4",
+                "text_font": "ctrl+m"}
+    moved, hints = quiet(KeyMap, {"keys": alt_free})
+    check(f"keys: README example without Alt, no warnings {hints!r}",
+          not hints and all(moved.labels(a) == [QKeySequence(k).toString()] for a, k in alt_free.items()))
 
     # Wayland detection (Qt-free, also under XWayland where Qt reports "xcb")
     from griffel.wm import wayland_session

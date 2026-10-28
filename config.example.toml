@@ -166,6 +166,9 @@ focus = "auto"
 # Several keys for one action as a list: ["delete", "backspace"].
 # "" = action without a key. Esc is fixed (end text input or quit the tool).
 # The defaults are laid out for QWERTY; on QWERTZ you may want to swap z and y here.
+# Alt is the modifier of your window manager (e.g. i3)? Then it takes Alt+A S D F and Alt+V
+# before griffel sees them; move them, e.g. size_1 = "ctrl+1" … size_4 = "ctrl+4",
+# text_font = "ctrl+m" (README, "Clashes with your window manager").
 # A dead key (e.g. ` on many international layouts) may only arrive with the next key press.
 # Bound twice: what is written here wins; the other action loses its key (warning in the terminal).
 tool_select = "w"            # select tool (always first in the bar)

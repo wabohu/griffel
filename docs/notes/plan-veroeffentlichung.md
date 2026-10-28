@@ -153,7 +153,7 @@ Gefunden beim Durchsehen des Codes, sortiert nach Wirkung auf fremde Nutzer.
 - Fehlendes `xclip`: Fallback auf Qt-Zwischenablage gibt es, aber das Bild verschwindet beim
   Beenden. Einmalige Meldung beim ersten Kopieren
 
-### 2.7 Tastenkürzel, die mit anderen Setups kollidieren können
+### 2.7 Tastenkürzel, die mit anderen Setups kollidieren können – erledigt 2026-10-28, siehe `plan-hotkeys.md`
 - Alt+A S D F, Alt+V, Alt+Rad: viele i3/Openbox-Nutzer haben Alt als Mod-Taste. Kein Code-
   Problem (alles per `[keys]` änderbar), aber in der Doku erwähnen
 - Globale Hotkeys: Beispiele für sxhkd, i3, bspwm, awesome, KDE/GNOME (Einstellungen), xbindkeys

@@ -77,6 +77,99 @@ griffel --version
 Put `griffel` on a global hotkey, that's how it's meant to be used. Inside, `?`
 shows all keys and Esc quits. The full list is in [docs/usage.md](docs/usage.md).
 
+### Global hotkey
+
+The examples use Super+Shift+S for a screenshot and Super+Shift+W for the
+whiteboard; `griffel --last` (latest screenshot from the history) is worth a key
+too. Your window manager has to find `griffel` in its `PATH`. Many don't see
+`~/.local/bin` when they aren't started from a login shell, so if nothing
+happens, use the absolute path.
+
+<details>
+<summary>sxhkd (also bspwm)</summary>
+
+```
+super + shift + s
+    griffel
+super + shift + w
+    griffel --board
+```
+
+Reload with `pkill -USR1 sxhkd`.
+</details>
+
+<details>
+<summary>i3</summary>
+
+```
+bindsym $mod+Shift+s exec --no-startup-id griffel
+bindsym $mod+Shift+w exec --no-startup-id griffel --board
+```
+
+Without `--no-startup-id`, i3 shows a busy cursor until it gives up waiting for
+a startup notification. Check that your config doesn't use these keys already.
+</details>
+
+<details>
+<summary>herbstluftwm</summary>
+
+```sh
+hc keybind Mod4-Shift-s spawn griffel
+hc keybind Mod4-Shift-w spawn griffel --board
+```
+</details>
+
+<details>
+<summary>awesome</summary>
+
+In `globalkeys` in `rc.lua`:
+
+```lua
+awful.key({ modkey, "Shift" }, "s", function () awful.spawn("griffel") end,
+          { description = "annotate a screenshot", group = "launcher" }),
+awful.key({ modkey, "Shift" }, "w", function () awful.spawn("griffel --board") end,
+          { description = "whiteboard", group = "launcher" }),
+```
+</details>
+
+<details>
+<summary>Openbox</summary>
+
+In the `<keyboard>` section of `rc.xml`, then `openbox --reconfigure`:
+
+```xml
+<keybind key="W-S-s">
+  <action name="Execute"><command>griffel</command></action>
+</keybind>
+<keybind key="W-S-w">
+  <action name="Execute"><command>griffel --board</command></action>
+</keybind>
+```
+</details>
+
+<details>
+<summary>xbindkeys (any window manager)</summary>
+
+In `~/.xbindkeysrc`:
+
+```
+"griffel"
+    Mod4+Shift + s
+"griffel --board"
+    Mod4+Shift + w
+```
+</details>
+
+<details>
+<summary>KDE Plasma, GNOME, Xfce, Cinnamon</summary>
+
+Add a custom shortcut with the command `griffel` in the keyboard settings
+(KDE: System Settings → Keyboard → Shortcuts → Add New → Command or Script;
+GNOME: Settings → Keyboard → Custom Shortcuts; Xfce: Keyboard → Application
+Shortcuts). GNOME and KDE start a Wayland session by default, where griffel
+refuses to take screenshots: choose the X11/Xorg session when logging in.
+</details>
+
 ## Configuration
 
 Settings live in `~/.config/griffel/config.toml`. Every option is explained in
@@ -86,6 +179,26 @@ anything missing falls back to the defaults.
 The default keys are laid out for QWERTY. On QWERTZ you may want to swap `z`
 and `y` under `[keys]`. The keyboard picture in the overview (`?`) follows your
 layout and can show a split or ortho keyboard instead (`[help]`).
+
+### Clashes with your window manager
+
+griffel doesn't grab the keyboard, so your global hotkeys keep working while
+it's open. The flip side: whatever your window manager binds never reaches
+griffel. If Alt is your window manager's modifier (common with i3, Openbox,
+awesome), the size keys Alt+A S D F and Alt+V (monospace text) are lost; i3's
+default config, for one, uses exactly these. Move them in the config:
+
+```toml
+[keys]
+size_1 = "ctrl+1"
+size_2 = "ctrl+2"
+size_3 = "ctrl+3"
+size_4 = "ctrl+4"
+text_font = "ctrl+m"
+```
+
+The overview (`?`) then shows the new keys. Alt+wheel (fine size adjustment)
+can't be changed; few window managers bind it.
 
 ## Privacy
 
