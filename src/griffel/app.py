@@ -28,9 +28,17 @@ from griffel.settings import Settings
 
 # --- Capture -----------------------------------------------------------------
 def grab_screen():
-    """Screenshot of the monitor under the mouse pointer (X11)."""
+    """Screenshot of the monitor under the mouse pointer (X11).
+
+    With scaling (HiDPI, e.g. Xft.dpi 192) Qt gives the pixmap a device pixel ratio of 2 and
+    the scene would count in logical pixels, while the file keeps the real ones: reopened,
+    every marking would land at half its position. So the scene always counts in image
+    pixels, and fit_overlay scales the view down (like for an image from a larger monitor).
+    """
     screen = QGuiApplication.screenAt(QCursor.pos()) or QGuiApplication.primaryScreen()
-    return screen, screen.grabWindow(0)
+    pixmap = screen.grabWindow(0)
+    pixmap.setDevicePixelRatio(1)
+    return screen, pixmap
 
 
 # --- Session check -----------------------------------------------------------

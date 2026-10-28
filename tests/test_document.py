@@ -1340,8 +1340,17 @@ def main():
           all(0 < w <= 1920 and 0 < h <= 1080 for w, h in sizes.values()))
     hp.close()
 
-    # Wayland: screenshot mode refuses to start (message, exit code 2), the env variable skips it
+    # Private clipboard file: without XDG_RUNTIME_DIR a folder per user in /tmp, not a shared one
     import os
+    from griffel.canvas_output import rich_copy_path
+    runtime = os.environ.pop("XDG_RUNTIME_DIR", None)
+    fallback = rich_copy_path()
+    if runtime is not None:
+        os.environ["XDG_RUNTIME_DIR"] = runtime
+    check(f"clipboard file without XDG_RUNTIME_DIR per user ({fallback})",
+          fallback.parent.name == f"griffel-{os.getuid()}")
+
+    # Wayland: screenshot mode refuses to start (message, exit code 2), the env variable skips it
     import subprocess
     from griffel import app as app_module
     saved = {k: os.environ.pop(k, None) for k in ("WAYLAND_DISPLAY", "XDG_SESSION_TYPE", app_module.IGNORE_WAYLAND)}

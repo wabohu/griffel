@@ -158,7 +158,7 @@ Gefunden beim Durchsehen des Codes, sortiert nach Wirkung auf fremde Nutzer.
   Problem (alles per `[keys]` änderbar), aber in der Doku erwähnen
 - Globale Hotkeys: Beispiele für sxhkd, i3, bspwm, awesome, KDE/GNOME (Einstellungen), xbindkeys
 
-### 2.8 Kleinkram
+### 2.8 Kleinkram – erledigt 2026-10-28 (HiDPI-Fehler gefunden, siehe `plan-hidpi.md`; Handtest zwei Monitore offen)
 - `--version` (Version aus `griffel.__version__`, siehe Phase 1)
 - Standardpfade prüfen: `[output] dir`, Verlauf in `$XDG_DATA_HOME/griffel/history` (ok)
 - Mehrere Monitore und HiDPI (`QT_SCALE_FACTOR=2`) – testest du; ich gebe dir die Fälle

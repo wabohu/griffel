@@ -36,9 +36,11 @@ DUPLICATE_OFFSET = 20  # Ctrl+D: offset in screen pixels
 
 
 def rich_copy_path():
-    """Private file with the editable version of the most recently copied image."""
-    base = os.environ.get("XDG_RUNTIME_DIR") or tempfile.gettempdir()
-    return Path(base) / "griffel" / "clipboard.json"
+    """Private file with the editable version of the most recently copied image. Without
+    $XDG_RUNTIME_DIR in a folder of its own per user in /tmp (shared by all users)."""
+    base = os.environ.get("XDG_RUNTIME_DIR")
+    folder = Path(base) / "griffel" if base else Path(tempfile.gettempdir()) / f"griffel-{os.getuid()}"
+    return folder / "clipboard.json"
 
 
 class OutputMixin:
@@ -179,10 +181,12 @@ class OutputMixin:
                   and not (isinstance(e, ShapeElement) and e.tool == Tool.BLUR)]  # already in the image
         try:
             path = rich_copy_path()
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(json.dumps({"format": CLIP_FORMAT, "png_sha256": hashlib.sha256(png).hexdigest(),
-                                        "elements": dicts}))
-            path.chmod(0o600)
+            path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+            # Created readable only for us from the start (contains a piece of the screenshot)
+            with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), "w") as f:
+                f.write(json.dumps({"format": CLIP_FORMAT, "png_sha256": hashlib.sha256(png).hexdigest(),
+                                    "elements": dicts}))
+            path.chmod(0o600)  # a file from an older version
         except OSError as e:
             print(f"[output] editable copy not stored: {e}", file=sys.stderr)
 

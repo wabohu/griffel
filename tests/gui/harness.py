@@ -102,12 +102,13 @@ def _free_display():
 
 
 class Session:
-    def __init__(self, name, size="1920x1080", wm=None):
+    def __init__(self, name, size="1920x1080", wm=None, env=None):
         self.wm = wm or os.environ.get("GRIFFEL_TEST_WM") or "herbstluftwm"
         if self.wm not in WMS:
             raise ValueError(f"unknown window manager {self.wm!r}, allowed: {', '.join(WMS)}")
         self.name = name if self.wm == "herbstluftwm" else f"{name}-{self.wm}"
         self.size = size
+        self.extra_env = env or {}  # e.g. {"QT_SCALE_FACTOR": "2"}
         self.tmp = Path(tempfile.mkdtemp(prefix="griffel-gui-"))
         self.out = OUT / self.name
         self.procs = []
@@ -141,6 +142,7 @@ class Session:
         env.update(DISPLAY=self.display, HOME=str(home), XDG_CONFIG_HOME=str(home / ".config"),
                    XDG_DATA_HOME=str(home / ".local" / "share"), XDG_RUNTIME_DIR=str(self.tmp),
                    XDG_SESSION_TYPE="x11")  # a real X11 session; without it Qt behaves differently
+        env.update(self.extra_env)
         self.env = env
 
         self.spawn(["Xvfb", self.display, "-screen", "0", f"{self.size}x24", "-nolisten", "tcp"])
