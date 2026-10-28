@@ -26,6 +26,13 @@ METHODS = ("auto", "herbstluftwm", "ewmh", "off")
 _hinted = False  # hint about missing xdotool/wmctrl only once per session
 
 
+def wayland_session(env=None):
+    """True in a Wayland session, also when Qt itself runs via XWayland (then platformName
+    is "xcb" too, so only the environment tells)."""
+    env = os.environ if env is None else env
+    return bool(env.get("WAYLAND_DISPLAY")) or env.get("XDG_SESSION_TYPE") == "wayland"
+
+
 def _run(cmd):
     """Run a command, return its output; None on any problem."""
     try:

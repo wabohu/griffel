@@ -1340,6 +1340,28 @@ def main():
           all(0 < w <= 1920 and 0 < h <= 1080 for w, h in sizes.values()))
     hp.close()
 
+    # Wayland: screenshot mode refuses to start (message, exit code 2), the env variable skips it
+    import os
+    import subprocess
+    from griffel import app as app_module
+    saved = {k: os.environ.pop(k, None) for k in ("WAYLAND_DISPLAY", "XDG_SESSION_TYPE", app_module.IGNORE_WAYLAND)}
+    qapp = QApplication.instance()
+    check("wayland: not detected in the test session", app_module.unsupported_session(qapp) is None)
+    os.environ["WAYLAND_DISPLAY"] = "wayland-0"
+    message = app_module.unsupported_session(qapp)
+    check("wayland: detected, message points to --board", message and "griffel --board" in message)
+    os.environ[app_module.IGNORE_WAYLAND] = "1"
+    check("wayland: GRIFFEL_IGNORE_WAYLAND skips the check", app_module.unsupported_session(qapp) is None)
+    del os.environ[app_module.IGNORE_WAYLAND]
+    run_py = Path(__file__).resolve().parent.parent / "run.py"
+    result = subprocess.run([sys.executable, str(run_py)], capture_output=True, text=True, timeout=30)
+    check(f"wayland: screenshot start quits with exit code 2 ({result.returncode})",
+          result.returncode == 2 and "X11 session" in result.stderr)
+    del os.environ["WAYLAND_DISPLAY"]
+    for k, v in saved.items():
+        if v is not None:
+            os.environ[k] = v
+
     print("\nAll OK." if not failures else f"\n{len(failures)} failed.")
     return 1 if failures else 0
 

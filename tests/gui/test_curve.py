@@ -31,7 +31,9 @@ def main():
         s.key("d")
         s.key("d")                                 # arrow again: curved
         time.sleep(0.2)
-        moves = [arg for x, y in ARC[1:] for arg in ("mousemove", str(x), str(y))]
+        # Short pauses, so Qt gets every point (without them it merges moves depending on the load,
+        # the fit differs from run to run and the click below can miss the curve)
+        moves = [arg for x, y in ARC[1:] for arg in ("mousemove", str(x), str(y), "sleep", "0.01")]
         s.run(["xdotool", "mousemove", *map(str, ARC[0]), "mousedown", "1", *moves, "mouseup", "1"])
         time.sleep(0.4)
         s.screenshot("01-curve")

@@ -142,7 +142,7 @@ Gefunden beim Durchsehen des Codes, sortiert nach Wirkung auf fremde Nutzer.
   dann passt rofi immer zur Leiste. `colors.rasi` nur noch, wenn `[ui] rofi_colors` gesetzt ist
 - Beim Paket: `griffel.rasi` als Paketdatei finden (siehe Phase 1, `importlib.resources`)
 
-### 2.6 Wayland und andere Grenzen sauber melden
+### 2.6 Wayland und andere Grenzen sauber melden – erledigt 2026-10-28, siehe `plan-wayland.md`
 - Unter Wayland liefert `grabWindow(0)` je nach Compositor ein schwarzes Bild, xclip geht nicht
 - Beim Start prüfen, zuerst `WAYLAND_DISPLAY` gesetzt oder `XDG_SESSION_TYPE == "wayland"`, erst
   danach `QGuiApplication.platformName()` nicht `xcb`. Unter XWayland meldet Qt ebenfalls `xcb`,

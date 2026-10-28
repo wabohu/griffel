@@ -13,7 +13,8 @@ diagrams.
 
 It's made for the keyboard and a tiling window manager (herbstluftwm and sxhkd
 in my case). It should run on any X11 setup, but I only use it on mine.
-Wayland doesn't work.
+Wayland doesn't work: there griffel refuses to take a screenshot and says so,
+only the whiteboard (`griffel --board`) opens.
 
 ## What it can do
 
@@ -50,7 +51,9 @@ Wayland doesn't work.
 
 ## Requirements
 
-- Linux with X11
+- Linux with X11. In a Wayland session (also via XWayland) griffel quits with a
+  message and exit code 2 instead of showing a black screenshot. If your setup
+  can take screenshots anyway, `GRIFFEL_IGNORE_WAYLAND=1` skips that check
 - Python 3.11 or newer and PySide6 (Arch: `pyside6`)
 - `xclip` for the clipboard
 - `xdotool` (or `wmctrl`) to give the keyboard focus back when the screenshot overlay

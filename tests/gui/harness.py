@@ -136,9 +136,11 @@ class Session:
         sxhkdrc.write_text(SXHKDRC.format(griffel=GRIFFEL, tmp=self.tmp, jump=JUMP[self.wm]))
 
         env = {k: v for k, v in os.environ.items()
-               if k not in ("QT_QPA_PLATFORM", "WAYLAND_DISPLAY", "DBUS_SESSION_BUS_ADDRESS", "XAUTHORITY")}
+               if k not in ("QT_QPA_PLATFORM", "WAYLAND_DISPLAY", "GRIFFEL_IGNORE_WAYLAND",
+                            "DBUS_SESSION_BUS_ADDRESS", "XAUTHORITY")}
         env.update(DISPLAY=self.display, HOME=str(home), XDG_CONFIG_HOME=str(home / ".config"),
-                   XDG_DATA_HOME=str(home / ".local" / "share"), XDG_RUNTIME_DIR=str(self.tmp))
+                   XDG_DATA_HOME=str(home / ".local" / "share"), XDG_RUNTIME_DIR=str(self.tmp),
+                   XDG_SESSION_TYPE="x11")  # a real X11 session; without it Qt behaves differently
         self.env = env
 
         self.spawn(["Xvfb", self.display, "-screen", "0", f"{self.size}x24", "-nolisten", "tcp"])

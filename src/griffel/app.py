@@ -9,6 +9,7 @@
 From the source folder: python run.py … Usage: docs/usage.md. The drawing surface is in canvas.py.
 """
 import argparse
+import os
 import sys
 from pathlib import Path
 
@@ -18,7 +19,7 @@ from PySide6.QtWidgets import QApplication
 from griffel import __version__
 from griffel.canvas import Canvas
 from griffel.document import load_document
-from griffel import history
+from griffel import history, wm
 from griffel.config import load_config
 from griffel.history import is_entry
 from griffel.notify import notify
@@ -30,6 +31,33 @@ def grab_screen():
     """Screenshot of the monitor under the mouse pointer (X11)."""
     screen = QGuiApplication.screenAt(QCursor.pos()) or QGuiApplication.primaryScreen()
     return screen, screen.grabWindow(0)
+
+
+# --- Session check -----------------------------------------------------------
+IGNORE_WAYLAND = "GRIFFEL_IGNORE_WAYLAND"  # set to 1 to skip the check (own risk)
+BOARD_HINT = "The whiteboard works: griffel --board"
+
+
+def unsupported_session(app):
+    """Why screenshots cannot work here, or None. Wayland: grabWindow returns a black image,
+    the overlay needs X11 (bypass window, xdotool)."""
+    if os.environ.get(IGNORE_WAYLAND):
+        return None
+    if wm.wayland_session():
+        return f"griffel needs an X11 session for screenshots (Wayland detected). {BOARD_HINT}"
+    platform = app.platformName()
+    if platform not in ("xcb", "offscreen"):
+        return f"griffel needs an X11 session for screenshots (Qt platform {platform}). {BOARD_HINT}"
+    return None
+
+
+def refuse_unsupported(app):
+    """Quit with exit code 2 if the screenshot overlay cannot work in this session."""
+    message = unsupported_session(app)
+    if message:
+        print(message, file=sys.stderr)
+        notify(message)  # often started without a terminal (hotkey), so also as a notification
+        sys.exit(2)
 
 
 # --- Start -------------------------------------------------------------------
@@ -65,6 +93,7 @@ def main():
                             board=True, board_color=background)
             canvas.show_window()
         else:
+            refuse_unsupported(app)
             # Own drawing: Ctrl+S overwrites it. Other image: Ctrl+S creates a new file
             # History entry: changes land there automatically, Ctrl+S creates (as with a
             # fresh screenshot) a separate file in the output folder
@@ -81,6 +110,7 @@ def main():
         canvas = Canvas(screen, None, board=True)
         canvas.show_window()
     else:
+        refuse_unsupported(app)
         screen, pixmap = grab_screen()  # grab first, then show the window!
         canvas = Canvas(screen, pixmap)
         canvas.show_overlay()

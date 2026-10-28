@@ -333,6 +333,12 @@ def main():
           "z" not in qwertz["keyboard"] and ("z", "Blur") in dict(qwertz["lists"]).get("Tools", [])
           and "y" not in qwertz["keyboard"] and "z" in shortcuts.overview(keymap, [Tool.RECT], 9, 4, False)["keyboard"])
 
+    # Wayland detection (Qt-free, also under XWayland where Qt reports "xcb")
+    from griffel.wm import wayland_session
+    check("wayland: WAYLAND_DISPLAY or XDG_SESSION_TYPE, not x11 or empty",
+          wayland_session({"WAYLAND_DISPLAY": "wayland-0"}) and wayland_session({"XDG_SESSION_TYPE": "wayland"})
+          and not wayland_session({"XDG_SESSION_TYPE": "x11", "WAYLAND_DISPLAY": ""}) and not wayland_session({}))
+
     print("\nAll OK." if not failures else f"\n{len(failures)} failed.")
     return 1 if failures else 0
 
