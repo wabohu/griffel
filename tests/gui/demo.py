@@ -3,6 +3,8 @@
     python tests/gui/demo.py
 
 Writes docs/images/screenshot.png (a terminal marked up in screenshot mode),
+docs/images/social.png (1280x640 from it, the preview for links to the repository; upload
+it under Settings -> Social preview),
 docs/images/whiteboard.png (a small diagram with docked arrows) and
 docs/images/overview.png (the key overview). Colors: Tokyo Night Storm from
 demo-alacritty.toml and the color selection in DEMO_CONFIG, the same for every run on every
@@ -136,6 +138,34 @@ def screenshot_demo():
         s.key("Escape")
 
 
+def social_preview():
+    """1280x640 for link previews: the marked-up terminal and a line with name and purpose."""
+    from PySide6.QtCore import QRect, Qt
+    from PySide6.QtGui import QColor, QFont, QImage, QPainter
+    shot = QImage(str(IMAGES / "screenshot.png"))
+    card = QImage(1280, 640, QImage.Format_RGB32)
+    card.fill(QColor("#24283b"))
+    painter = QPainter(card)
+    painter.setRenderHint(QPainter.SmoothPixmapTransform)
+    painter.drawImage(QRect(0, 0, 1280, 530), shot, QRect(0, 100, 1811, 750))  # same aspect ratio, line 1 to the note
+    painter.fillRect(0, 530, 1280, 110, QColor("#1d202f"))
+    font = QFont()
+    font.setPixelSize(44)
+    font.setBold(True)
+    painter.setFont(font)
+    painter.setPen(QColor("#c0caf5"))
+    painter.drawText(QRect(48, 530, 300, 110), Qt.AlignVCenter, "griffel")
+    font.setPixelSize(28)
+    font.setBold(False)
+    painter.setFont(font)
+    painter.setPen(QColor("#a9b1d6"))
+    painter.drawText(QRect(260, 530, 1000, 110), Qt.AlignVCenter,
+                     "Screenshot annotation and whiteboard for X11")
+    painter.end()
+    card.save(str(IMAGES / "social.png"))
+    print("written: docs/images/social.png")
+
+
 def panel_area(image, inset=4):
     """Bounding box of everything not black above the bar (the overview on an empty screen),
     a few pixels inside its rounded edge."""
@@ -225,5 +255,6 @@ def whiteboard_demo():
 
 if __name__ == "__main__":
     screenshot_demo()
+    social_preview()
     overview_demo()
     whiteboard_demo()

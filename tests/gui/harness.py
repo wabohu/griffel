@@ -142,6 +142,7 @@ class Session:
         env.update(DISPLAY=self.display, HOME=str(home), XDG_CONFIG_HOME=str(home / ".config"),
                    XDG_DATA_HOME=str(home / ".local" / "share"), XDG_RUNTIME_DIR=str(self.tmp),
                    XDG_SESSION_TYPE="x11")  # a real X11 session; without it Qt behaves differently
+        env.setdefault("SHELL", "/bin/sh")  # sxhkd runs its commands with it (missing in containers)
         env.update(self.extra_env)
         self.env = env
 

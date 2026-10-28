@@ -1,5 +1,7 @@
 # griffel
 
+[![tests](https://github.com/wabohu/griffel/actions/workflows/tests.yml/badge.svg)](https://github.com/wabohu/griffel/actions/workflows/tests.yml)
+
 A screenshot annotation tool and whiteboard for Linux. I wanted something like
 Epic Pen or Tekapoint on my own X11 desktop, something I could change whenever
 it got in my way. This is it.

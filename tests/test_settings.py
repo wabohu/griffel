@@ -360,6 +360,22 @@ def main():
         missing.append("move hjkl")
     check(f"usage.md: every default key in the key reference {missing or ''}", not missing)
 
+    # Release notes: the CHANGELOG section of a version (scripts/changelog_section.py)
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "changelog_section", Path(__file__).resolve().parent.parent / "scripts" / "changelog_section.py")
+    changelog = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(changelog)
+    sample = "# Changelog\n\n## [0.2.0] - unreleased\n\n- new\n\n## [0.1.0] - 2026-11-01\n\nFirst.\n\n- a\n"
+    heading, body = changelog.section(sample, "0.1.0")
+    check("changelog: section of 0.1.0 up to the end, without the heading",
+          heading == "## [0.1.0] - 2026-11-01" and body == "First.\n\n- a")
+    check("changelog: stops before the next section, unknown version = None",
+          changelog.section(sample, "0.2.0")[1] == "- new" and changelog.section(sample, "0.3.0") is None)
+    with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+        unreleased = changelog.main(["x", "v0.1.0"])  # the real CHANGELOG: 0.1.0 is not released yet
+    check(f"changelog: 'unreleased' stops the release ({unreleased})", unreleased == 1)
+
     # Wayland detection (Qt-free, also under XWayland where Qt reports "xcb")
     from griffel.wm import wayland_session
     check("wayland: WAYLAND_DISPLAY or XDG_SESSION_TYPE, not x11 or empty",

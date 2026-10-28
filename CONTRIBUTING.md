@@ -47,6 +47,22 @@ look changes on purpose, `python tests/regress.py --update` rewrites the
 reference image. `python tests/gui/demo.py` makes the pictures in the README
 (also needs alacritty and bat).
 
+## Releasing
+
+1. Set `__version__` in `src/griffel/__init__.py` to the new version (e.g. `0.1.0`,
+   during development it is `0.1.0.dev0`)
+2. In `CHANGELOG.md`, replace "unreleased" in its heading with the date
+3. Run all tests, commit, then tag and push:
+   ```sh
+   git tag -a v0.1.0 -m "griffel 0.1.0"
+   git push origin main v0.1.0
+   ```
+4. The `release` workflow runs the tests, checks that tag and `__version__` match, and
+   creates the GitHub release with that CHANGELOG section as its notes. The source
+   tarball of the release is what the AUR package builds from
+5. Afterwards set `__version__` to the next `.dev0` version and start a new
+   "unreleased" section in `CHANGELOG.md`
+
 ## Conventions
 
 - Small steps; the program must start after each one

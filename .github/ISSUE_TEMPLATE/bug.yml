@@ -1,0 +1,49 @@
+name: Bug report
+description: Something doesn't work as described
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. Many problems (black screenshot, no focus after
+        closing, empty clipboard, keys that don't arrive) are covered in
+        [docs/troubleshooting.md](https://github.com/wabohu/griffel/blob/main/docs/troubleshooting.md).
+  - type: input
+    id: version
+    attributes:
+      label: griffel version
+      description: Output of `griffel --version`
+      placeholder: griffel 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: Distribution, window manager or desktop
+      placeholder: Arch Linux, i3
+    validations:
+      required: true
+  - type: dropdown
+    id: session
+    attributes:
+      label: Session type
+      description: Output of `echo $XDG_SESSION_TYPE`
+      options:
+        - X11
+        - Wayland
+        - don't know
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What did you do, what did you expect, what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Terminal output
+      description: Start griffel from a terminal and paste what it prints.
+      render: text

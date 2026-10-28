@@ -1,0 +1,32 @@
+# Push a tag v<version> (see CONTRIBUTING.md, "Releasing"): the tests run, then a GitHub
+# release is created with the notes of that version from CHANGELOG.md. Its source tarball
+# is what the AUR package builds from.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  tests:
+    uses: ./.github/workflows/tests.yml
+
+  release:
+    needs: tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag and version match
+        run: |
+          version=$(PYTHONPATH=src python3 -c 'import griffel; print(griffel.__version__)')
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match griffel.__version__ $version"; exit 1
+          fi
+      - name: Release notes from CHANGELOG.md
+        run: python3 scripts/changelog_section.py "$GITHUB_REF_NAME" > notes.md
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --title "griffel ${GITHUB_REF_NAME#v}" --notes-file notes.md

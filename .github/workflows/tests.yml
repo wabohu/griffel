@@ -1,0 +1,55 @@
+# All tests in an Arch Linux container: the same packages (pyside6 from pacman) as on the
+# developer's machine and in the AUR package. Also called by release.yml before a release.
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Packages
+        # ttf-dejavu: regress.py runs with an empty HOME, so fontconfig picks DejaVu Sans; the
+        # reference is rendered with it
+        run: pacman -Syu --noconfirm --needed git python pyside6 ttf-dejavu
+               python-build python-installer python-setuptools python-wheel
+      - uses: actions/checkout@v4
+      - name: Settings
+        run: python tests/test_settings.py
+      - name: Documents
+        run: python tests/test_document.py
+      - name: Regression picture
+        run: python tests/regress.py
+      - name: Upload the difference picture
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regress-diff
+          path: /tmp/regress_*.png
+          if-no-files-found: ignore
+      - name: Wheel contains the rofi theme
+        run: |
+          python -m build --wheel --no-isolation
+          python -m zipfile -l dist/*.whl | grep -q 'griffel/data/griffel.rasi'
+
+  gui:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Packages
+        run: pacman -Syu --noconfirm --needed git python pyside6 ttf-dejavu
+               xorg-server-xvfb herbstluftwm sxhkd xdotool xclip imagemagick i3-wm rofi
+      - uses: actions/checkout@v4
+      - name: GUI scenarios
+        run: python tests/gui/run.py
+      - name: Upload the screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gui-screenshots
+          path: tests/gui/out/
