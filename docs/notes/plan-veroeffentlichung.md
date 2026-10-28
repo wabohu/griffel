@@ -135,7 +135,7 @@ Gefunden beim Durchsehen des Codes, sortiert nach Wirkung auf fremde Nutzer.
 - GUI-Harness: WM als Parameter (`Session(wm="i3")`), dann laufen `test_overlay` und
   `test_board` auch mit i3 bzw. ohne WM
 
-### 2.5 rofi-Theme und `~/.config/rofi/colors.rasi`
+### 2.5 rofi-Theme und `~/.config/rofi/colors.rasi` – erledigt 2026-10-17, siehe `plan-rofi.md`
 - `griffel.rasi` erwartet Variablennamen meines Rofi-Setups (`base03`, `base02` …), sonst
   Tokyo-Night-Fallback, der nicht zur griffel-Palette passt
 - Neu: Farben aus `ui.Theme` per `-theme-str` übergeben (Hintergrund, Vordergrund, Akzent),

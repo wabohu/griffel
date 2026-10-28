@@ -13,7 +13,6 @@ from pathlib import Path
 
 # Package data: found in the source folder and in the installed package (pyproject.toml, package-data)
 ROFI_THEME = Path(str(files("griffel") / "data" / "griffel.rasi"))
-ROFI_COLORS = Path.home() / ".config" / "rofi" / "colors.rasi"
 NOT_AVAILABLE = object()  # return value of ask() when rofi is not usable
 
 _last_notification_id = None  # replace the same notification instead of stacking new ones
@@ -44,23 +43,39 @@ def notify(text, error=False, timeout_ms=3000):
     return True
 
 
-def ask(question, choices, theme=None):
-    """Choice via rofi -dmenu. Returns: index of the choice, None on Esc/cancel,
-    NOT_AVAILABLE if rofi is missing or does not start (then use a Qt dialog).
-
-    rofi grabs the keyboard itself; an own keyboard grab would have to be
-    released beforehand (the tool no longer uses one, see Canvas.show_overlay).
-    """
-    if _headless() or not shutil.which("rofi"):
-        return NOT_AVAILABLE
+def rofi_command(question, theme=None, colors=None, colors_file=None):
+    """Command line for rofi -dmenu. theme: own rasi file (None = griffel.rasi),
+    colors: {variable: "#rrggbb"} for the theme (the bar colors), colors_file: rasi file
+    that is loaded instead of colors ([ui] rofi_colors)."""
     theme = Path(theme).expanduser() if theme else ROFI_THEME
     # -i: case-insensitive, -matching fuzzy: "dc" finds "Discard", "cn" finds "Cancel"
     cmd = ["rofi", "-dmenu", "-i", "-matching", "fuzzy", "-no-custom", "-format", "i",
            "-p", "", "-mesg", question]
     if theme.is_file():
         cmd += ["-theme", str(theme)]
-        if ROFI_COLORS.is_file():  # also load own colors, if present
-            cmd += ["-theme-str", f'@import "{ROFI_COLORS}"']
+    colors_file = Path(colors_file).expanduser() if colors_file else None
+    if colors_file and colors_file.is_file():
+        cmd += ["-theme-str", f'@import "{colors_file}"']
+    else:
+        if colors_file:
+            print(f"[ui] rofi_colors: {colors_file} not found, using the bar colors", file=sys.stderr)
+        if colors:
+            values = " ".join(f"{name}: {value};" for name, value in colors.items())
+            cmd += ["-theme-str", f"* {{ {values} }}"]
+    return cmd
+
+
+def ask(question, choices, theme=None, colors=None, colors_file=None):
+    """Choice via rofi -dmenu. Returns: index of the choice, None on Esc/cancel,
+    NOT_AVAILABLE if rofi is missing or does not start (then use a Qt dialog).
+    theme, colors, colors_file: see rofi_command.
+
+    rofi grabs the keyboard itself; an own keyboard grab would have to be
+    released beforehand (the tool no longer uses one, see Canvas.show_overlay).
+    """
+    if _headless() or not shutil.which("rofi"):
+        return NOT_AVAILABLE
+    cmd = rofi_command(question, theme, colors, colors_file)
     try:
         result = subprocess.run(cmd, input="\n".join(choices), capture_output=True,
                                 text=True, timeout=300)

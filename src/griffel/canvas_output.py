@@ -270,7 +270,8 @@ class OutputMixin:
             return NOT_AVAILABLE
         self.asking = True  # rofi has the focus now, do not take it back
         try:
-            return ask(question, choices, self.settings.rofi_theme)
+            return ask(question, choices, self.settings.rofi_theme,
+                       self.settings.rofi_vars(), self.settings.rofi_colors)
         finally:
             self.asking = False
             if not self.board:

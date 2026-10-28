@@ -1,9 +1,10 @@
 /**
  * Compact prompt for griffel (e.g. "Save / Discard / Cancel").
  *
- * Colors: your ~/.config/rofi/colors.rasi is additionally loaded on each call,
- * if it exists (griffel passes it via -theme-str). If it is missing, the
- * values after the comma in var(...) apply (Tokyo Night Storm).
+ * Colors: griffel passes the colors of its bar on each call (-theme-str sets the six
+ * variables below). With [ui] rofi_colors it loads that rasi file instead, then the
+ * variables come from its names in var(...). Started without griffel, the values after
+ * the comma apply (Tokyo Night Storm).
  */
 * {
     background:     var(base03, #24283b);

@@ -65,9 +65,13 @@ messages = "dunst"
 # choose with arrow keys or fuzzy input) or "qt" (Qt dialog). If rofi is missing: "qt".
 dialogs = "rofi"
 # Own rofi theme for the prompts; if not set, the one that comes with griffel
-# (src/griffel/data/griffel.rasi)
-# (additionally loads ~/.config/rofi/colors.rasi, if it exists)
+# (src/griffel/data/griffel.rasi). It gets the bar colors as variables (background,
+# background-alt, foreground, dimmed, selected, frame).
 # rofi_theme = "~/.config/rofi/themes/griffel.rasi"
+# Colors of the rofi prompts: empty = the bar colors above. Or a rasi file that is loaded
+# instead, e.g. "~/.config/rofi/colors.rasi" (variables base03 base02 base01 base00 white
+# blue; it may also set the font).
+rofi_colors = ""
 
 [board]
 # Whiteboard (griffel --board): background color. Name as in [colors],

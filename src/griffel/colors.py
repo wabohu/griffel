@@ -143,6 +143,12 @@ def adapt_color(hex_color, background, overrides=None):
     return darken_for(hex_color, background)
 
 
+def mix(a, b, t):
+    """Color between a and b ("#rrggbb"): t = 0 -> a, t = 1 -> b."""
+    channels = (round((1 - t) * x * 255 + t * y * 255) for x, y in zip(_channels(a), _channels(b)))
+    return "#%02x%02x%02x" % tuple(channels)
+
+
 def normalize_color(value):
     """'#RRGGBB' or '0xRRGGBB' -> '#rrggbb'. Anything else -> None."""
     if not isinstance(value, str):

@@ -186,6 +186,27 @@ def main():
           and themed.palette.lookup("background") == "#202020"
           and themed.theme.background.name() == "#202020")
 
+    # rofi prompts: bar colors as rasi variables, or own rasi file ([ui] rofi_colors)
+    from griffel import notify
+    bar = st.Settings({"ui": {"bar_background": "#000000", "bar_foreground": "#ffffff",
+                              "bar_accent": "#ff0000", "bar_opacity": 0.5}}, False)
+    rv = bar.rofi_vars()
+    check(f"rofi: colors from the bar, opaque, mixed in between ({rv})",
+          rv == {"background": "#000000", "foreground": "#ffffff", "selected": "#ff0000",
+                 "background-alt": "#262626", "frame": "#4c4c4c", "dimmed": "#a6a6a6"}
+          and s.rofi_colors is None
+          and st.Settings({"ui": {"rofi_colors": "~/x.rasi"}}, False).rofi_colors == "~/x.rasi")
+    cmd = notify.rofi_command("Save?", colors={"background": "#000000", "frame": "#4d4d4d"})
+    with tempfile.TemporaryDirectory() as tmp:
+        rasi = Path(tmp) / "colors.rasi"
+        rasi.write_text("* { base03: #111111; }")
+        with_file = notify.rofi_command("Save?", colors=rv, colors_file=rasi)
+        missing_file, hints = quiet(notify.rofi_command, "Save?", None, rv, Path(tmp) / "nope.rasi")
+    check("rofi: command line with the bar colors, a rasi file instead, missing file -> bar colors",
+          cmd[-4:] == ["-theme", str(notify.ROFI_THEME), "-theme-str", "* { background: #000000; frame: #4d4d4d; }"]
+          and with_file[-1] == f'@import "{rasi}"' and "background:" not in " ".join(with_file)
+          and missing_file[-1].startswith("* { background: #000000;") and "rofi_colors" in hints)
+
     # Focus after the overlay: [wm] focus
     bad_focus, hints = quiet(st.Settings, {"wm": {"focus": "sway"}}, False)
     check("[wm] focus: valid taken over, missing = auto, unknown -> hint, auto",

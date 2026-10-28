@@ -11,7 +11,7 @@ from pathlib import Path
 
 from PySide6.QtGui import QColor
 
-from griffel.colors import load_palette, load_terminal_font, palette_overrides
+from griffel.colors import load_palette, load_terminal_font, mix, palette_overrides
 from griffel.config import get_float, get_int, get_int_list, get_list, get_str
 from griffel.export import default_output_dir
 from griffel.history import default_history_dir
@@ -168,6 +168,8 @@ class Settings:
         self.use_dunst = self.config_choice(config, "messages", ("dunst", "toast"))
         self.use_rofi = self.config_choice(config, "dialogs", ("rofi", "qt"))
         self.rofi_theme = get_str(config, "ui", "rofi_theme")  # None = data/griffel.rasi in the package
+        # rasi file with own rofi colors instead of the bar colors (None = bar colors, rofi_vars)
+        self.rofi_colors = get_str(config, "ui", "rofi_colors") or None
 
         # Giving the focus back after the screenshot overlay ([wm] focus, see wm.py)
         self.focus_method = get_str(config, "wm", "focus") or "auto"
@@ -394,6 +396,14 @@ class Settings:
         return Theme(color("bar_background", DEFAULT_BAR_BACKGROUND),
                      color("bar_foreground", DEFAULT_BAR_FOREGROUND), opacity,
                      color("bar_accent", DEFAULT_BAR_ACCENT), color("bar_heading", DEFAULT_BAR_HEADING))
+
+    def rofi_vars(self):
+        """Colors for the variables of griffel.rasi, from the bar colors. Opaque: a
+        transparent rofi window needs a compositor, otherwise it turns black."""
+        bg, fg = self.theme.background.name(), self.theme.foreground.name()
+        return {"background": bg, "foreground": fg, "selected": self.theme.accent.name(),
+                "background-alt": mix(bg, fg, 0.15), "frame": mix(bg, fg, 0.3),
+                "dimmed": mix(bg, fg, 0.65)}
 
     def index_of(self, hex_color):
         """Position of a color in the bar; if it is missing, the first field."""
