@@ -242,15 +242,15 @@ can't be changed; few window managers bind it.
   under `[history]`.
 - To pass an image on, Ctrl+E exports a plain PNG without any editing data.
 
-## Tests
+Details in [docs/file-format.md](docs/file-format.md).
 
-```sh
-python tests/test_settings.py
-python tests/test_document.py
-python tests/regress.py
-python tests/gui/run.py      # needs Xvfb, herbstluftwm, sxhkd, xdotool (optional: i3)
-python tests/gui/demo.py     # the pictures in this README (also needs alacritty and bat)
-```
+## Documentation
+
+- [Using griffel](docs/usage.md): every feature, and a key reference
+- [Troubleshooting](docs/troubleshooting.md)
+- [File format](docs/file-format.md): what a saved PNG contains
+- [Changelog](CHANGELOG.md)
+- [Contributing](CONTRIBUTING.md): bug reports, tests, how the code is organized
 
 ## License
 

@@ -38,6 +38,7 @@ A home-made take on Epic Pen / Tekapoint for Linux. A screenshot of the monitor 
 ## Further documents
 Not needed in every session, read when relevant:
 - `docs/usage.md`: user documentation, one section per feature (what, how, keys in small tables), key reference at the end. No implementation details there. Keep it up to date with new or changed features and keys; `tests/test_settings.py` checks that every default key is in the key reference
+- `docs/troubleshooting.md`, `docs/file-format.md` (public, English): keep them in sync when error handling, dependencies or the saved data change. `CHANGELOG.md`: user-visible changes go under the next version
 - `docs/notes/roadmap.md` (German): roadmap (numbered items, "roadmap 15" means item 15) and design decisions D1–D5. Read before a new roadmap item, tick it off afterwards
 - `docs/notes/plan-*.md` (German): plans for larger changes (data model, controls/bars, splitting `annotate.py`, today `app.py`, package structure, publishing)
 

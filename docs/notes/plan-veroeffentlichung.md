@@ -164,7 +164,7 @@ Gefunden beim Durchsehen des Codes, sortiert nach Wirkung auf fremde Nutzer.
 - Mehrere Monitore und HiDPI (`QT_SCALE_FACTOR=2`) – testest du; ich gebe dir die Fälle
 - Deutsch im Code/UI suchen (`grep` auf Umlaute) – soll laut CLAUDE.md schon englisch sein
 
-## Phase 3: Doku und README
+## Phase 3: Doku und README – erledigt 2026-10-28 (ohne Man page und Badges)
 Detailplan: `plan-doku.md` (2026-10-28)
 
 ### README (Englisch, wie bisher persönlich im Ton)
