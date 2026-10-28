@@ -158,20 +158,22 @@ Gefunden beim Durchsehen des Codes, sortiert nach Wirkung auf fremde Nutzer.
   Problem (alles per `[keys]` änderbar), aber in der Doku erwähnen
 - Globale Hotkeys: Beispiele für sxhkd, i3, bspwm, awesome, KDE/GNOME (Einstellungen), xbindkeys
 
-### 2.8 Kleinkram – erledigt 2026-10-28 (HiDPI-Fehler gefunden, siehe `plan-hidpi.md`; Handtest zwei Monitore offen)
+### 2.8 Kleinkram – erledigt 2026-10-28 (HiDPI-Fehler gefunden, siehe `plan-hidpi.md`)
 - `--version` (Version aus `griffel.__version__`, siehe Phase 1)
 - Standardpfade prüfen: `[output] dir`, Verlauf in `$XDG_DATA_HOME/griffel/history` (ok)
 - Mehrere Monitore und HiDPI (`QT_SCALE_FACTOR=2`) – testest du; ich gebe dir die Fälle
 - Deutsch im Code/UI suchen (`grep` auf Umlaute) – soll laut CLAUDE.md schon englisch sein
 
 ## Phase 3: Doku und README
+Detailplan: `plan-doku.md` (2026-10-28)
+
 ### README (Englisch, wie bisher persönlich im Ton)
 1. Ein Satz, was es ist + **GIF/Screenshots** oben (annotierter Screenshot, Whiteboard mit
    Verbindern, Tastenübersicht). Tipp: Der Xvfb-Harness kann Demo-Bilder reproduzierbar
    erzeugen (neues Skript `tests/gui/demo.py`, gibt es noch nicht), GIF per `ffmpeg`/`peek` aus deiner echten Session
 2. Why – das Epic-Pen/Tekapoint-Motiv, kurz
 3. Features (gibt es schon, gut)
-4. Install: AUR (`yay -S …`), pipx, aus dem Quellcode
+4. Install: AUR (`yay -S …`), aus dem Quellcode (kein pipx, siehe Offene Fragen)
 5. Quick start: Hotkey einrichten (Beispiele für 3–4 WMs/DEs als aufklappbare `<details>`)
 6. Configuration, Privacy (was gespeicherte Dateien und der Verlauf enthalten, Phase 2.1),
    Limitations (X11 only, getestet auf …), Contributing, License
@@ -275,6 +277,6 @@ package() {
 ## Offene Fragen
 - Unterstützte Ziele für 0.1.0: Vorschlag „X11 + beliebiger WM, getestet mit herbstluftwm und i3“,
   KDE/GNOME auf Xorg als „sollte gehen“, damit der Bypass-Fokus das Release nicht aufhält
-- pipx/PyPI zusätzlich zum AUR? Der Name `griffel` ist auf PyPI frei
+- ~~pipx/PyPI zusätzlich zum AUR?~~ Entschieden 2026-10-28: nur AUR
 - ~~Gespeicherte Dateien: ganzes Rohbild behalten oder beschneiden~~ Entschieden 2026-10-15:
   Option `[output] keep_full_screenshot`, Standard `false` (beschneiden), Verlauf behält alles

@@ -340,6 +340,26 @@ def main():
     check(f"keys: README example without Alt, no warnings {hints!r}",
           not hints and all(moved.labels(a) == [QKeySequence(k).toString()] for a, k in alt_free.items()))
 
+    # docs/usage.md: every default key (except the slot rows) is in the key reference
+    usage = (Path(__file__).resolve().parent.parent / "docs" / "usage.md").read_text()
+    reference = usage.split("## Key reference", 1)[-1]
+    names = {"return": "Enter", "delete": "Del", "up": "↑", "down": "↓", "left": "←", "right": "→"}
+
+    def as_kbd(key):
+        if key == "shift+?":  # ? is Shift+/ on the US layout, written as ?
+            return "<kbd>?</kbd>"
+        return "+".join(f"<kbd>{names.get(part, part.capitalize() if len(part) > 1 else part.upper())}</kbd>"
+                        for part in key.split("+"))
+    slot = ("tool_", "color_", "size_")
+    missing = [f"{action}={key}" for action, keys in DEFAULT_KEYS.items()
+               if keys and not action.startswith(slot)
+               for key in ([keys] if isinstance(keys, str) else keys)
+               if as_kbd(key) not in reference
+               and not action.startswith("move_")]  # hjkl rows, checked below
+    if "<kbd>H</kbd> <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd>" not in reference:
+        missing.append("move hjkl")
+    check(f"usage.md: every default key in the key reference {missing or ''}", not missing)
+
     # Wayland detection (Qt-free, also under XWayland where Qt reports "xcb")
     from griffel.wm import wayland_session
     check("wayland: WAYLAND_DISPLAY or XDG_SESSION_TYPE, not x11 or empty",

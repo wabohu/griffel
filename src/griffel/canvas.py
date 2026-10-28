@@ -630,7 +630,7 @@ class Canvas(InputMixin, BoardMixin, OutputMixin, HistoryMixin, PointerMixin, Cr
                 self.cancel_crop()
             elif self.crop_selected:  # selected crop (select tool): remove the crop
                 self.cancel_crop()
-            elif self.selected_element():  # clear the selection first, then quit
+            elif self.selected_elements():  # clear the selection first (also several), then quit
                 self.scene_.clearSelection()
                 self.update_bars()
             elif not self.board:  # the whiteboard only closes with Ctrl+Q / closing the window

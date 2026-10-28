@@ -1340,6 +1340,23 @@ def main():
           all(0 < w <= 1920 and 0 < h <= 1080 for w, h in sizes.values()))
     hp.close()
 
+    # Esc with several elements selected: clears the selection, does not quit
+    from griffel.elements import ShapeElement as _EscShape
+    esc_shapes = []
+    for x in (20, 150):
+        shape = _EscShape(Tool.RECT, QPointF(x, 20), QColor("white"), 3)
+        shape.points = [QPointF(0, 0), QPointF(100, 60)]
+        shape.rebuild()
+        esc_shapes.append(shape)
+    ec = make_canvas(QPixmap(400, 200), esc_shapes)
+    QTest.keyClick(ec, Qt.Key_A, Qt.ControlModifier)
+    selected = len(ec.selected_elements())
+    QTest.keyClick(ec, Qt.Key_Escape)
+    check(f"Esc with {selected} selected: selection cleared, still open",
+          selected == 2 and not ec.selected_elements() and ec.isVisible())
+    QTest.keyClick(ec, Qt.Key_Escape)
+    check("Esc again without a selection: quits", not ec.isVisible())
+
     # Private clipboard file: without XDG_RUNTIME_DIR a folder per user in /tmp, not a shared one
     import os
     from griffel.canvas_output import rich_copy_path
