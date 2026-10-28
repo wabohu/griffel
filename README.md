@@ -6,15 +6,15 @@ it got in my way. This is it.
 
 griffel (say GRIF-ul) is German for the stylus you write on a slate with.
 
+![A terminal marked up with griffel: numbered markers, a box, an arrow with a note and a blurred password](docs/images/screenshot.png)
+
 Press a hotkey and griffel freezes the current monitor. Draw arrows, boxes and
 notes on top, blur what nobody should see, then paste the result wherever it
 needs to go. Without a screenshot it's a whiteboard for quick sketches and
 diagrams.
 
 It's made for the keyboard and a tiling window manager (herbstluftwm and sxhkd
-in my case). It should run on any X11 setup, but I only use it on mine.
-Wayland doesn't work: there griffel refuses to take a screenshot and says so,
-only the whiteboard (`griffel --board`) opens.
+in my case). It needs X11; see [Tested on](#tested-on).
 
 ## What it can do
 
@@ -40,6 +40,9 @@ only the whiteboard (`griffel --board`) opens.
   annotation can still be edited today
 
 **Whiteboard**
+
+![A diagram on the whiteboard: boxes with labels, connected by arrows](docs/images/whiteboard.png)
+
 - Endless canvas with pan and zoom, dark or light background
 - Arrows stick to shapes and follow them when you move things around
 - On a light background colors are darkened automatically so they stay readable
@@ -49,24 +52,39 @@ only the whiteboard (`griffel --board`) opens.
 - Keys, tools, colors and sizes can be changed in a TOML file
 - Scales with the screen, so it stays usable on 4K
 
-## Requirements
+## Install
 
-- Linux with X11. In a Wayland session (also via XWayland) griffel quits with a
-  message and exit code 2 instead of showing a black screenshot. If your setup
-  can take screenshots anyway, `GRIFFEL_IGNORE_WAYLAND=1` skips that check
-- Python 3.11 or newer and PySide6 (Arch: `pyside6`)
-- `xclip` for the clipboard
+### Arch Linux
+
+griffel will be in the AUR with its first release (0.1.0):
+
+```sh
+yay -S griffel
+```
+
+### From source
+
+```sh
+sudo pacman -S pyside6 xclip xdotool        # Arch; optional: libnotify rofi
+git clone https://github.com/wabohu/griffel.git
+ln -s "$PWD/griffel/run.py" ~/.local/bin/griffel
+```
+
+`run.py` starts griffel straight from the source folder, so `git pull` updates it.
+
+### Requirements
+
+- Linux with X11 (see [Tested on](#tested-on))
+- Python 3.11 or newer and PySide6
+- `xclip` for the clipboard. Without it the copied image is gone when griffel quits
 - `xdotool` (or `wmctrl`) to give the keyboard focus back when the screenshot overlay
   closes. Only with herbstluftwm it works without them (via `herbstclient`)
 - Optional: `notify-send` with a notification daemon like dunst, and `rofi` for prompts.
-  Without them griffel falls back to its own Qt dialogs.
+  Without them griffel falls back to its own Qt dialogs
 
 ## Getting started
 
 ```sh
-git clone https://github.com/wabohu/griffel.git
-ln -s "$PWD/griffel/run.py" ~/.local/bin/griffel   # starts it from the source folder
-
 griffel              # annotate a screenshot of the monitor under the mouse
 griffel --board      # empty whiteboard in a normal window
 griffel --last       # open the latest screenshot from the history
@@ -74,8 +92,11 @@ griffel image.png    # open a saved drawing or any PNG
 griffel --version
 ```
 
-Put `griffel` on a global hotkey, that's how it's meant to be used. Inside, `?`
-shows all keys and Esc quits. The full list is in [docs/usage.md](docs/usage.md).
+Put `griffel` on a global hotkey, that's how it's meant to be used (examples
+below). Inside, `?` shows all keys and Esc quits. How everything works is
+explained in [docs/usage.md](docs/usage.md).
+
+![The key overview: a keyboard picture with the tools, colors and sizes, and lists of the other keys](docs/images/overview.png)
 
 ### Global hotkey
 
@@ -200,6 +221,16 @@ text_font = "ctrl+m"
 The overview (`?`) then shows the new keys. Alt+wheel (fine size adjustment)
 can't be changed; few window managers bind it.
 
+## Tested on
+
+- **Works, tested:** Arch Linux on X11 with herbstluftwm and i3
+- **Should work, not tested:** other window managers and desktops on Xorg (KDE
+  Plasma, Xfce, GNOME on Xorg). The part most likely to go wrong there is giving
+  the keyboard focus back when the screenshot closes. Bug reports are welcome
+- **Doesn't work:** Wayland, also via XWayland. griffel refuses to take a
+  screenshot there and says so (exit code 2); only the whiteboard opens. If your
+  setup can take screenshots anyway, `GRIFFEL_IGNORE_WAYLAND=1` skips that check
+
 ## Privacy
 
 - Saved drawings (Ctrl+S, Shift+Enter) carry their editing data inside the PNG,
@@ -218,6 +249,7 @@ python tests/test_settings.py
 python tests/test_document.py
 python tests/regress.py
 python tests/gui/run.py      # needs Xvfb, herbstluftwm, sxhkd, xdotool (optional: i3)
+python tests/gui/demo.py     # the pictures in this README (also needs alacritty and bat)
 ```
 
 ## License

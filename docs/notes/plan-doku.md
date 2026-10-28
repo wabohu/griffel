@@ -1,6 +1,6 @@
 # Plan: Doku für die Veröffentlichung (Phase 3)
 
-Stand: 2026-10-28, Schritt 1 (`usage.md`) **umgesetzt**, Schritte 2 und 3 offen. Gesamtplan: `plan-veroeffentlichung.md`, Phase 3.
+Stand: 2026-10-28, Schritte 1 (`usage.md`) und 2 (README, `tests/gui/demo.py`) **umgesetzt**, Schritt 3 offen. Gesamtplan: `plan-veroeffentlichung.md`, Phase 3.
 
 Entschieden: nur AUR, kein PyPI/pipx.
 
